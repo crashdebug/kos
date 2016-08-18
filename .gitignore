@@ -2,3 +2,6 @@ tools/*
 build/*
 .vscode/*
 googletest
+*.o
+*.a
+*.bin
