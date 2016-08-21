@@ -12,11 +12,11 @@ CPPFLAGS?=
 LDFLAGS?=
 LIBS?=
 
-DESTDIR?=
-PREFIX?=/usr/local
-EXEC_PREFIX?=$(PREFIX)
-INCLUDEDIR?=$(PREFIX)/include
-LIBDIR?=$(EXEC_PREFIX)/lib
+BUILDDIR?=../build
+#PREFIX?=/usr/local
+#EXEC_PREFIX?=$(PREFIX)
+#INCLUDEDIR?=$(PREFIX)/include
+#LIBDIR?=$(EXEC_PREFIX)/lib
 
 CFLAGS:=$(CFLAGS) -Wall -Wextra
 CPPFLAGS:=$(CPPFLAGS) -D__kos_libc -Iinclude
@@ -36,15 +36,7 @@ FREEOBJS:=\
 $(ARCH_FREEOBJS) \
 string.o \
 stdio/printf.o \
-#stdio/putchar.o \
-#stdio/puts.o \
-#stdlib/abort.o \
-#string/memcmp.o \
-#string/memcpy.o \
-#string/memmove.o \
-#string/memset.o \
-#string/strlen.o \
- 
+
 HOSTEDOBJS:=\
 $(ARCH_HOSTEDOBJS) \
  
@@ -54,32 +46,42 @@ $(HOSTEDOBJS) \
  
 LIBK_OBJS:=$(FREEOBJS:.o=.libk.o)
  
-BINARIES=libc.a libg.a libk.a
- 
-all: $(BINARIES)
- 
+BINARIES=libc.a #libg.a libk.a
+
+DIRS=$(sort $(dir $(addprefix $(BUILDDIR)/libc/, $(OBJS))))
+
+#reverse = $(if $(1),$(call reverse,$(wordlist 2,$(words $(1)),$(1)))) $(firstword $(1))
+
+VPATH = $(BUILDDIR)/libc
+
+all: $(DIRS) $(BINARIES)
+
 .PHONY: all clean
  
 libc.a: $(OBJS)
-	$(AR) rcs $@ $(OBJS)
+	$(AR) rcs $(BUILDDIR)/$@ $(addprefix $(BUILDDIR)/libc/, $(OBJS))
  
 libg.a:
 	$(AR) rcs $@
  
 libk.a: $(LIBK_OBJS)
 	$(AR) rcs $@ $(LIBK_OBJS)
- 
+
 %.o: %.c
-	$(CC) -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
- 
+	$(CC) -c $< -o $(BUILDDIR)/libc/$@ $(CFLAGS) $(CPPFLAGS)
+
 %.o: %.s
-	$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
- 
+	$(CC) -c $< -o $(BUILDDIR)/libc/$@ $(CFLAGS) $(CPPFLAGS)
+
 %.libk.o: %.c
-	$(CC) -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
- 
+	$(CC) -c $< -o $(BUILDDIR)/$@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+
 %.libk.o: %.s
-	$(CC) -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
- 
+	$(CC) -c $< -o $(BUILDDIR)/$@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+
 clean:
-	rm -f $(BINARIES) $(OBJS) $(LIBK_OBJS) *.o */*.o */*/*.o
+	rm -f $(addprefix $(BUILDDIR)/, $(BINARIES)) $(addprefix $(BUILDDIR)/libc/, $(OBJS))
+	rm -rf $(BUILDDIR)/libc
+
+$(DIRS):
+	mkdir -p $@
