@@ -65,8 +65,12 @@ void formatNumber(long num, unsigned char radix, int width, char pad, void (*put
 	}
 }
 
+#ifdef TEST
+namespace kos {
+#endif
+
 //void printf(void (*putchr)(char), const char* text, va_list args)
-void printf(const char* __restrict text, ...)
+int printf(const char* __restrict text, ...)
 {
 	va_list args;
 	va_start(args, text);
@@ -142,6 +146,7 @@ void printf(const char* __restrict text, ...)
 		}
 	}
 	va_end(args);
+	return 0;
 }
 
 /*void printf(void(*putchr)(char), const char* text, ...)
@@ -156,3 +161,7 @@ void init_printf(void(*putchr)(char))
 {
 	s_putchr = putchr;
 }
+
+#ifdef TEST
+}
+#endif

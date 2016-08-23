@@ -35,7 +35,17 @@
 		L	long long (64-bit) int					no
 *****************************************************************************/
 
+#ifdef TEST
+namespace kos {
+#endif
+
 //void printf(void(*putchr)(char), const char* text, ...);
 //void printf(void(*putchr)(char), const char* text, va_list args);
-void printf(const char* __restrict text, ...);
+int printf(const char* __restrict text, ...);
 void init_printf(void(*putchr)(char));
+
+#ifdef TEST
+}
+#endif
+
+#endif
