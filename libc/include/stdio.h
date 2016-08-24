@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _KOS_STDIO
+#define _KOS_STDIO 1
+
 #include <stdarg.h>
 
 /*****************************************************************************
