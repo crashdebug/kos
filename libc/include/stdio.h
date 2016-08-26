@@ -1,8 +1,6 @@
 #ifndef _KOS_STDIO
 #define _KOS_STDIO 1
 
-#include <stdarg.h>
-
 /*****************************************************************************
 	Minimal subfunction for printf. Outputs each character and formats
 	any additional arguments.
@@ -41,8 +39,6 @@
 namespace kos {
 #endif
 
-//void printf(void(*putchr)(char), const char* text, ...);
-//void printf(void(*putchr)(char), const char* text, va_list args);
 int printf(const char* __restrict text, ...);
 void init_printf(void(*putchr)(char));
 

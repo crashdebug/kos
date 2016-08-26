@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdarg.h>
 
 #define FORMAT_BUFLEN 256
 char formatBuffer[FORMAT_BUFLEN];
@@ -76,7 +76,7 @@ int printf(const char* __restrict text, ...)
 	va_start(args, text);
 
 	unsigned char state = 0;
-	unsigned int width = -1;
+	unsigned int width = 0;
 
 	// Loop thru each character in sText
 	for (char *p = (char*)text; *p; p++)

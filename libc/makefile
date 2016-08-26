@@ -1,25 +1,25 @@
 HOST?=$(shell ../scripts/default-host.sh)
 HOSTARCH:=$(shell ../scripts/target-triplet-to-arch.sh $(HOST))
 
-BINS?=../tools/bin/$(HOST)-
-
 CC=g++
 AR=ar
 AS=as
 
 CFLAGS?=-O2 -g
-CPPFLAGS?=
 LDFLAGS?=
 LIBS?=
 
 ifeq ($(MAKECMDGOALS),test)
 BUILDDIR?=../build/tests
+BINS=
+CPPFLAGS?=-DTEST
 else
 BUILDDIR?=../build
+BINS?=../tools/bin/$(HOST)-
+CPPFLAGS?=
 endif
 
 CFLAGS:=$(CFLAGS) -Wall -Wextra
-CPPFLAGS:=$(CPPFLAGS) -D__kos_libc -Iinclude
 LIBK_CFLAGS:=$(CFLAGS) -ffreestanding -fbuiltin
 LIBK_CPPFLAGS:=$(CPPFLAGS) -D__kos_kernel
  
@@ -88,16 +88,12 @@ clean:
 $(DIRS):
 	mkdir -p $@
 
-test: $(BUILDDIR)/libgtest.a TESTCONFIG $(BUILDDIR)/libk.a
-	g++ -isystem ../googletest/googletest/include -pthread -std=c++11 -fpermissive -D TEST tests/main.cpp $(BUILDDIR)/libgtest.a -o $(BUILDDIR)/libc/test -lk -L$(BUILDDIR)
+test: $(BUILDDIR)/libgtest.a $(BUILDDIR)/libk.a
+	$(CC) -isystem ../googletest/googletest/include -pthread -std=c++11 -fpermissive -g -DTEST tests/main.cpp $(BUILDDIR)/libgtest.a -o $(BUILDDIR)/libc/test -lk -L$(BUILDDIR)
 	$(BUILDDIR)/libc/test
 
-TESTCONFIG:
-	$(eval BINS=)
-	$(eval CPPFLAGS=$(CPPFLAGS) -D TEST)
-
 $(BUILDDIR)/gtest-all.o:
-	g++ -isystem ../googletest/googletest/include -I../googletest/googletest -pthread -c ../googletest/googletest/src/gtest-all.cc -o $(BUILDDIR)/gtest-all.o
+	$(CC) -isystem ../googletest/googletest/include -I../googletest/googletest -pthread -c ../googletest/googletest/src/gtest-all.cc -o $(BUILDDIR)/gtest-all.o
 
 $(BUILDDIR)/libgtest.a: $(BUILDDIR)/gtest-all.o
-	ar -rv $(BUILDDIR)/libgtest.a $(BUILDDIR)/gtest-all.o
+	$(AR) -rv $(BUILDDIR)/libgtest.a $(BUILDDIR)/gtest-all.o
