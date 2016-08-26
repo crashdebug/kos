@@ -1,7 +1,7 @@
 HOST?=$(shell ../scripts/default-host.sh)
 HOSTARCH:=$(shell ../scripts/target-triplet-to-arch.sh $(HOST))
 
-BINS=../tools/bin/$(HOST)-
+BINS?=../tools/bin/$(HOST)-
 
 CC=g++
 AR=ar
@@ -17,10 +17,6 @@ BUILDDIR?=../build/tests
 else
 BUILDDIR?=../build
 endif
-#PREFIX?=/usr/local
-#EXEC_PREFIX?=$(PREFIX)
-#INCLUDEDIR?=$(PREFIX)/include
-#LIBDIR?=$(EXEC_PREFIX)/lib
 
 CFLAGS:=$(CFLAGS) -Wall -Wextra
 CPPFLAGS:=$(CPPFLAGS) -D__kos_libc -Iinclude
@@ -66,9 +62,9 @@ $(BUILDDIR)/libc.a: $(addprefix $(BUILDDIR)/libc/, $(OBJS))
  
 $(BUILDDIR)/libg.a:
 	$(BINS)$(AR) rcs $@
- 
-$(BUILDDIR)/libk.a: $(addprefix $(BUILDDIR)/libc/, $(OBJS))
-	$(BINS)$(AR) rcs $@ $(addprefix $(BUILDDIR)/libc/, $(OBJS))
+
+libk $(BUILDDIR)/libk.a: $(DIRS) $(addprefix $(BUILDDIR)/libc/, $(OBJS))
+	$(BINS)$(AR) rcs $(BUILDDIR)/libk.a $(addprefix $(BUILDDIR)/libc/, $(OBJS))
 #	$(AR) rcs $@ $(LIBK_OBJS)
 
 $(BUILDDIR)/libc/%.o: %.c
@@ -92,7 +88,7 @@ clean:
 $(DIRS):
 	mkdir -p $@
 
-test: $(DIRS) $(BUILDDIR)/libgtest.a TESTCONFIG $(BUILDDIR)/libk.a
+test: $(BUILDDIR)/libgtest.a TESTCONFIG $(BUILDDIR)/libk.a
 	g++ -isystem ../googletest/googletest/include -pthread -std=c++11 -fpermissive -D TEST tests/main.cpp $(BUILDDIR)/libgtest.a -o $(BUILDDIR)/libc/test -lk -L$(BUILDDIR)
 	$(BUILDDIR)/libc/test
 

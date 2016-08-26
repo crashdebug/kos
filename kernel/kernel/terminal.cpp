@@ -1,6 +1,10 @@
 #include <terminal.h>
 #include <stdio.h>
 
+#ifdef TEST
+using namespace kos;
+#endif
+
 uint8_t make_color(enum Terminal::Color fg, enum Terminal::Color bg) {
 	return fg | bg << 4;
 }

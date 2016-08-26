@@ -1,0 +1,25 @@
+Prerequisites
+sudo apt-get install libgmp3-dev libmpfr-dev libisl-dev libcloog-isl-dev libmpc-dev texinfo
+
+mkdir ./tools/src
+cd ./tools/src
+
+install git
+
+build binutils
+    git clone git://sourceware.org/git/binutils-gdb.git
+    sudo apt-get install bison
+    sudo apt-get install flex
+    export $PREFIX="$HOME/opt/cross"
+    export $TARGET=i686_elf
+    export $PATH="$PREFIX/bin:$PATH"
+    mkdir binutils-build
+    cd binutils-build
+    ../binutils-gdb/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror
+    make
+    make install
+
+install subversion
+
+build gcc
+    svn checkout svn://gcc.gnu.org/svn/gcc/trunk ./gcc

@@ -1,41 +1,41 @@
-sources = ./src/kernel.cpp ./src/terminal.cpp ./src/printf.cpp
-objects = ./build/boot.o ./build/kernel.o ./build/terminal.o ./build/printf.o
-images = ./build/kos.bin ./build/kos.iso
-tests = ./test/printf.cpp
+BUILDDIR?=./build
 
-kos.bin : boot.o kernel
-	./tools/bin/i686-elf-gcc -T ./src/linker.ld -o ./build/kos.bin -ffreestanding -O2 -nostdlib $(objects) -lgcc
+TESTS=memory.cpp \
+	printf.cpp \
+	terminal.cpp \
 
-boot.o : ./build ./src/boot.s
-	./tools/bin/i686-elf-as ./src/boot.s -o ./build/boot.o
+all: kernel
 
-kernel : ./build $(sources)
-	cd ./build ; \
-	../tools/bin/i686-elf-g++ -c $(addprefix ., $(sources)) -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti
+.PHONY: all test kernel iso run install binutils gcc
 
-./build :
-	mkdir ./build
+test:
+	cd ./libc ; \
+	make test BUILDDIR=$(BUILDDIR)
+	cd ./kernel ; \
+	make test BUILDDIR=$(BUILDDIR)
 
-#######################################################
+kernel $(BUILDDIR)/kos.bin: $(BUILDDIR)/libc.a
+	cd ./kernel ; \
+	make BUILDDIR=$(BUILDDIR) 
 
-.PHONY : clean
-clean :
-	rm -f $(objects) $(images) ./build/tests
+$(BUILDDIR)/libc.a:
+	cd ./libc ; \
+	make BUILDDIR=$(BUILDDIR)
 
-#######################################################
+$(BUILDDIR)/libgtest.a:
+	g++ -isystem googletest/googletest/include -Igoogletest/googletest -pthread -c googletest/googletest/src/gtest-all.cc -o $(BUILDDIR)/gtest-all.o
+	ar -rv $@ $(BUILDDIR)/gtest-all.o
 
-run : kos.bin
-	qemu-system-i386 -kernel ./build/kos.bin
+iso $(BUILDDIR)/kos.iso: $(BUILDDIR)/kos.bin grub.cfg
+	mkdir -p $(BUILDDIR)/iso/boot/grub
+	cp grub.cfg $(BUILDDIR)/iso/boot/grub/
+	cp $(BUILDDIR)/kos.bin $(BUILDDIR)/iso/boot/
+	grub-mkrescue -o $(BUILDDIR)/kos.iso iso
+	rm $(BUILDDIR)/iso/boot/kos.bin $(BUILDDIR)/iso/boot/grub/grub.cfg
+	rmdir -p $(BUILDDIR)/iso/boot/grub
 
-iso kos.iso : kos.bin
-	mkdir -p ./iso/boot/grub
-	cp ./src/grub.cfg ./iso/boot/grub/
-	cp ./build/kos.bin ./iso/boot/
-	grub-mkrescue -o ./build/kos.iso iso
-	rm ./iso/boot/kos.bin ./iso/boot/grub/grub.cfg
-	rmdir -p iso/boot/grub
-
-#######################################################
+run : $(BUILDDIR)/kos.bin
+	qemu-system-i386 -kernel $(BUILDDIR)/kos.bin
 
 install : binutils gcc
 
@@ -47,9 +47,3 @@ binutils :
 
 gcc :
 	svn checkout svn://gcc.gnu.org/svn/gcc/trunk ./gcc
-
-test : ./build
-#	g++ -isystem googletest/googletest/include -Igoogletest/googletest -pthread -c googletest/googletest/src/gtest-all.cc
-#	ar -rv libgtest.a gtest-all.o
-	g++ -isystem googletest/googletest/include -pthread ./tests/main.cpp libgtest.a -o ./build/tests
-	./build/tests

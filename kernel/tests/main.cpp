@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "printf.cpp"
-#include "terminal.cpp"
+#include "terminal_tests.cpp"
+//#include "memory_tests.cpp"
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

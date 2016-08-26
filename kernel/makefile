@@ -1,23 +1,26 @@
 HOST?=$(shell ../scripts/default-host.sh)
 HOSTARCH:=$(shell ../scripts/target-triplet-to-arch.sh $(HOST))
 
-BINS=../tools/bin
+ifneq ($(MAKECMDGOALS),test)
+BINS=../tools/bin/$(HOST)-
+BUILDDIR?=../build
+CPPFLAGS?=
+LIBFLAGS=
+else
+BINS=
+BUILDDIR?=../build/tests
+CPPFLAGS=-D TEST -fpermissive
+LIBFLAGS=$(BUILDDIR)/libk.a BINS= CPPFLAGS="-D TEST -D__kos_libc -Iinclude"
+endif
 
-CC=$(BINS)/$(HOST)-gcc
-CPP=$(BINS)/$(HOST)-g++
-AR=$(BINS)/$(HOST)-ar
-AS=$(BINS)/$(HOST)-as
+CC=gcc
+CPP=g++
+AR=ar
+AS=as
 
 CFLAGS?=-O2 -g
-CPPFLAGS?=
 LDFLAGS?=
 LIBS?=
-
-#PREFIX?=/usr/local
-#EXEC_PREFIX?=$(PREFIX)
-#BOOTDIR?=$(EXEC_PREFIX)/boot
-#INCLUDEDIR?=$(PREFIX)/include
-BUILDDIR?=../build
 
 CFLAGS:=$(CFLAGS) -ffreestanding -fbuiltin -Wall -Wextra -fno-exceptions -fno-rtti
 CPPFLAGS:=$(CPPFLAGS) -Iinclude -I../libc/include 
@@ -34,63 +37,76 @@ LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
  
 OBJS:=\
-$(KERNEL_ARCH_OBJS) \
 kernel/kernel.o \
+
+LIBOBJS:=\
 kernel/terminal.o \
+#kernel/new.o \
 kernel/memory.o \
-kernel/new.o \
 kernel/pagebitmap.o \
 kernel/pageblockmap.o \
 
 CRTI_OBJ:=$(ARCHDIR)/crti.o
-CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
-CRTEND_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtend.o)
+CRTBEGIN_OBJ:=$(shell $(BINS)$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
+CRTEND_OBJ:=$(shell $(BINS)$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtend.o)
 CRTN_OBJ:=$(ARCHDIR)/crtn.o
 
 ALL_OUR_OBJS:=\
+$(KERNEL_ARCH_OBJS) \
 $(CRTI_OBJ) \
 $(OBJS) \
+$(LIBOBJS) \
 $(CRTN_OBJ) \
 
 OBJ_LINK_LIST:=\
-$(OBJS) \
-$(CRTI_OBJ) \
-$(CRTN_OBJ) \
+$(ALL_OUR_OBJS) \
 $(CRTBEGIN_OBJ) \
 $(CRTEND_OBJ) \
 
 DIRS=$(sort $(dir $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS))))
 
-VPATH = $(BUILDDIR)/kernel
+all: $(BUILDDIR)/kos.bin
 
-all: kos.bin
+.PHONY: all clean run test
 
-.PHONY: all clean run
+$(BUILDDIR)/kos.bin: $(DIRS) $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS)) $(ARCHDIR)/linker.ld $(BUILDDIR)/libc.a
+	$(BINS)$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS)) $(CRTBEGIN_OBJ) $(CRTEND_OBJ) $(LDFLAGS) $(LIBS)
 
-kos.bin: $(DIRS) $(OBJ_LINK_LIST) $(ARCHDIR)/linker.ld $(BUILDDIR)/libc.a
-	$(CC) -T $(ARCHDIR)/linker.ld -o $(BUILDDIR)/$@ $(CFLAGS) $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS)) $(CRTBEGIN_OBJ) $(CRTEND_OBJ) $(LDFLAGS) $(LIBS)
+$(BUILDDIR)/kernel/%.o: %.cpp
+	$(BINS)$(CPP) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
-%.o: %.cpp
-	$(CPP) -c $< -o $(BUILDDIR)/kernel/$@ $(CFLAGS) $(CPPFLAGS)
+$(BUILDDIR)/kernel/%.o: %.c
+	$(BINS)$(CC) -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
 
-%.o: %.c
-	$(CC) -c $< -o $(BUILDDIR)/kernel/$@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
+$(BUILDDIR)/kernel/%.o: %.s
+	$(BINS)$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
-%.o: %.s
-	$(CC) -c $< -o $(BUILDDIR)/kernel/$@ $(CFLAGS) $(CPPFLAGS)
-
-libc.a:
-	make ../libc/makefile BUILDDIR=$(BUILDDIR)
+$(BUILDDIR)/libc.a:
+	cd ../libc ; \
+	make $(LIBFLAGS) BUILDDIR=$(BUILDDIR)
 
 $(DIRS):
 	mkdir -p $@
 
 clean: 
 	rm -f $(BUILDDIR)/kos.bin $(BUILDDIR)/libkos.a $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS))
-	rm -rf $(BUILDDIR)/kernel
+	rm -f $(addprefix $(BUILDDIR)/tests/kernel/, $(ALL_OUR_OBJS)) $(BUILDDIR)/tests/libkos.a
+	rm -f $(BUILDDIR)/tests/gtest-all.o $(BUILDDIR)/tests/libgtest.a $(BUILDDIR)/tests/kernel/test
+	rm -rf $(BUILDDIR)/kernel $(BUILDDIR)/tests/kernel 
 
-run: kos.bin
+run: $(BUILDDIR)/kos.bin
 	qemu-system-i386 -kernel $(BUILDDIR)/kos.bin
 
-lib: $(DIRS) $(OBJ_LINK_LIST) $(ARCHDIR)/linker.ld $(BUILDDIR)/libc.a
-	$(AR) rcs $(BUILDDIR)/libkos.a $(addprefix $(BUILDDIR)/kernel/, $(OBJS))
+$(BUILDDIR)/libkos.a: $(DIRS) $(addprefix $(BUILDDIR)/kernel/, $(LIBOBJS)) $(ARCHDIR)/linker.ld $(BUILDDIR)/libc.a
+	$(BINS)$(AR) rcsT $(BUILDDIR)/libkos.a $(addprefix $(BUILDDIR)/kernel/, $(LIBOBJS))
+	$(BINS)$(AR) qT $(BUILDDIR)/libkos.a $(BUILDDIR)/libk.a
+
+test: $(DIRS) $(BUILDDIR)/libgtest.a $(BUILDDIR)/libkos.a
+	g++ -isystem ../googletest/googletest/include -pthread -std=c++11 -fpermissive -Iinclude -D TEST tests/main.cpp $(BUILDDIR)/libgtest.a -o $(BUILDDIR)/kernel/test -lkos -L$(BUILDDIR)
+	$(BUILDDIR)/kernel/test
+
+$(BUILDDIR)/gtest-all.o:
+	g++ -isystem ../googletest/googletest/include -I../googletest/googletest -pthread -c ../googletest/googletest/src/gtest-all.cc -o $(BUILDDIR)/gtest-all.o
+
+$(BUILDDIR)/libgtest.a: $(BUILDDIR)/gtest-all.o
+	ar -rv $(BUILDDIR)/libgtest.a $(BUILDDIR)/gtest-all.o
