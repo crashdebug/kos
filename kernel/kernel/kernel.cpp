@@ -25,7 +25,15 @@ void kernel_early()
 void kernel_main(multiboot_info_t* mbd, uint32_t magic)
 {
 	Terminal::initialize((uint16_t*)0xB8000, 80, 25);
-	printf("[kOS v0.0.1]\n");
+	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLUE);
+	printf("[");
+	Terminal::setColor(Terminal::Color::COLOR_WHITE, Terminal::Color::COLOR_BLUE);
+	printf("kOS ");
+	Terminal::setColor(Terminal::Color::COLOR_CYAN, Terminal::Color::COLOR_BLUE);
+	printf("v0.0.0");
+	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLUE);
+	printf("]\n");
+	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLACK);
 	printf("BootInfo: 0x%8x, Magic: 0x%x\n", mbd, magic);
 	//Terminal::write("\n");
 }
