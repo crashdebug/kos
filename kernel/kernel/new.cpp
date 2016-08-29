@@ -11,6 +11,8 @@ void* operator new[] (__SIZE_TYPE__, void*& address)
 	return address;
 }
 
+#ifndef __lib
+
 /// Overload the operator "new"
 void * operator new (__SIZE_TYPE__ size)
 {
@@ -46,3 +48,5 @@ void operator delete[] (void* p, __SIZE_TYPE__)
 {
     MemoryManager::MemFree(p);
 }
+
+#endif // end __lib

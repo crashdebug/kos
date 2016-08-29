@@ -1,5 +1,9 @@
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void* memset(void* bufptr, int value, size_t size)
 {
 	unsigned char* buf = (unsigned char*) bufptr;
@@ -16,3 +20,7 @@ void* memcpy(void* __restrict dstptr, const void* __restrict srcptr, size_t size
 		dst[i] = src[i];
 	return dstptr;
 }
+
+#ifdef __cplusplus
+}
+#endif

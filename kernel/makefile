@@ -9,7 +9,7 @@ LIBFLAGS=
 else
 BINS=
 BUILDDIR?=../build/tests
-CPPFLAGS=-D TEST -fpermissive
+CPPFLAGS=-DTEST -D__lib -fpermissive
 LIBFLAGS=$(BUILDDIR)/libk.a BINS= CPPFLAGS="-D TEST -D__kos_libc -Iinclude"
 endif
 
@@ -18,12 +18,12 @@ CPP=g++
 AR=ar
 AS=as
 
-CFLAGS?=-O2 -g
+CFLAGS?=-O2
 LDFLAGS?=
 LIBS?=
 
-CFLAGS:=$(CFLAGS) -ffreestanding -fbuiltin -Wall -Wextra -fno-exceptions -fno-rtti
-CPPFLAGS:=$(CPPFLAGS) -Iinclude -I../libc/include 
+CFLAGS:=$(CFLAGS) -ffreestanding -fbuiltin -Wall -Wextra -fno-exceptions -Iinclude -I../libc/include
+CPPFLAGS:=$(CPPFLAGS) -fno-rtti 
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lgcc -lc -L$(BUILDDIR)
 
@@ -41,10 +41,10 @@ kernel/kernel.o \
 
 LIBOBJS:=\
 kernel/terminal.o \
-#kernel/new.o \
 kernel/memory.o \
 kernel/pagebitmap.o \
 kernel/pageblockmap.o \
+kernel/new.o \
 
 CRTI_OBJ:=$(ARCHDIR)/crti.o
 CRTBEGIN_OBJ:=$(shell $(BINS)$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
@@ -76,7 +76,7 @@ $(BUILDDIR)/kernel/%.o: %.cpp
 	$(BINS)$(CPP) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 $(BUILDDIR)/kernel/%.o: %.c
-	$(BINS)$(CC) -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
+	$(BINS)$(CC) -c $< -o $@ -std=gnu11 $(CFLAGS)
 
 $(BUILDDIR)/kernel/%.o: %.s
 	$(BINS)$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
@@ -102,7 +102,7 @@ $(BUILDDIR)/libkos.a: $(DIRS) $(addprefix $(BUILDDIR)/kernel/, $(LIBOBJS)) $(ARC
 	$(BINS)$(AR) qT $(BUILDDIR)/libkos.a $(BUILDDIR)/libk.a
 
 test: $(DIRS) $(BUILDDIR)/libgtest.a $(BUILDDIR)/libkos.a
-	g++ -isystem ../googletest/googletest/include -pthread -std=c++11 -fpermissive -Iinclude -D TEST tests/main.cpp $(BUILDDIR)/libgtest.a -o $(BUILDDIR)/kernel/test -lkos -L$(BUILDDIR)
+	g++ -isystem ../googletest/googletest/include -pthread -std=c++11 -fpermissive -Iinclude -g -DTEST tests/main.cpp $(BUILDDIR)/libgtest.a -o $(BUILDDIR)/kernel/test -lkos -L$(BUILDDIR)
 	$(BUILDDIR)/kernel/test
 
 $(BUILDDIR)/gtest-all.o:

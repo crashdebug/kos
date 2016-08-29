@@ -63,6 +63,9 @@ _start:
 	# C++ features such as global constructors and exceptions will require 
 	# runtime support to work as well. 
 
+	# Setup GDT
+	call install_gdt
+
 	# Initialize the core kernel before running the global constructors.
 	call kernel_early
 
@@ -97,6 +100,26 @@ _start:
 .Lhang:
 	hlt
 	jmp .Lhang
+
+# This will set up our new segment registers. We need to do
+# something special in order to set CS. We do what is called a
+# far jump. A jump that includes a segment as well as an offset.
+
+.global _GDTFlush			# Allows the C code to link to this
+.type _GDTFlush, @function
+.extern _gdtptr		# Says that '_oGDTPtr' is in another file
+
+_GDTFlush:
+	lgdt _gdtptr		# Load the GDT with our '_gp' which is a special pointer
+	mov	$0x10, %ax		# 0x10 is the offset in the GDT to our data segment
+	mov	%ax, %ds
+	mov	%ax, %es
+	mov	%ax, %fs
+	mov	%ax, %gs
+	mov	%ax, %ss
+	ljmp $0x08, $Flush2	# 0x08 is the offset to our code segment: Far jump!
+Flush2:
+	ret					# Returns back to the C code!
 
 # Set the size of the _start symbol to the current location '.' minus its start. 
 # This is useful when debugging or when you implement call tracing. 
