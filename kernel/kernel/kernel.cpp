@@ -3,6 +3,7 @@
 #include <terminal.h>
 #include <multiboot.h>
 #include <time.h>
+#include <memory.h>
 
 /* Check if the compiler thinks we are targeting the wrong operating system. */ 
 #if defined(__linux__) 
@@ -14,11 +15,12 @@
 #error "This needs to be compiled with a ix86-elf compiler" 
 #endif
 
+unsigned long long _time = 0;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-unsigned long long _time = 0;
 extern void set_time_fn(time_t(*fn)(void));
 
 unsigned long long ticks()
@@ -31,14 +33,18 @@ void set_ticks(unsigned long long t)
 	_time = t;
 }
 
-void kernel_early()
+void kernel_early(multiboot_info_t* mbd, uint32_t magic)
 {
 	set_time_fn(&ticks);
+
+	Terminal::initialize((uint16_t*)0xB8000, 80, 25);
+	printf("BootInfo: 0x%8x, Magic: 0x%x\n", mbd, magic);
+
+	MemoryManager::Initialize(mbd);
 }
 
-void kernel_main(multiboot_info_t* mbd, uint32_t magic)
+void kernel_main()
 {
-	Terminal::initialize((uint16_t*)0xB8000, 80, 25);
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLUE);
 	printf("[");
 	Terminal::setColor(Terminal::Color::COLOR_WHITE, Terminal::Color::COLOR_BLUE);
@@ -48,8 +54,6 @@ void kernel_main(multiboot_info_t* mbd, uint32_t magic)
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLUE);
 	printf("]\n");
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLACK);
-	printf("BootInfo: 0x%8x, Magic: 0x%x\n", mbd, magic);
-	//Terminal::write("\n");
 }
 
 void __cxa_pure_virtual()

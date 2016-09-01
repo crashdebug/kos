@@ -15,6 +15,10 @@
 .long FLAGS
 .long CHECKSUM
 
+# The address of the multiboot info
+bootinfo:
+.long 0
+
 # The multiboot standard does not define the value of the stack pointer register 
 # (esp) and it is up to the kernel to provide a stack. This allocates room for a 
 # small stack by creating a symbol at the bottom of it, then allocating 16384 
@@ -38,6 +42,8 @@ stack_top:
 .global _start
 .type _start, @function
 _start:
+	movl %ebx, bootinfo
+
 	# To set up a stack, we set the esp register to point to the top of our 
 	# stack (as it grows downwards on x86 systems). This is necessarily done 
 	# in assembly as languages such as C cannot function without a stack. 
@@ -75,16 +81,16 @@ _start:
 	# Setup interrupt service routines
 	call install_isr
 
+	# Push magic number and the location of the multiboot info table
+	# on to the stack. These will be passed to kernel_early() as arguments. 
+	push $0xc0ffee
+	pushl bootinfo
+
 	# Initialize the core kernel before running the global constructors.
 	call kernel_early
 
 	# Call the global constructors.
 	call _init
-
-	# Push magic number and the location of the multiboot info table
-	# on to the stack. These will be passed to kernel_main() as arguments. 
-	push $0xc0ffee
-	pushl %ebx
 
 	# Enter the high-level kernel. The ABI requires the stack is 16-byte 
 	# aligned at the time of the call instruction (which afterwards pushes 
@@ -114,21 +120,21 @@ _start:
 # something special in order to set CS. We do what is called a
 # far jump. A jump that includes a segment as well as an offset.
 
-.extern _gdtptr		# Says that '_oGDTPtr' is in another file
+.extern _gdtptr				# Says that '_oGDTPtr' is in another file
 .global _GDTFlush			# Allows the C code to link to this
 .type _GDTFlush, @function
 
 _GDTFlush:
-	lgdt _gdtptr		# Load the GDT with our '_gp' which is a special pointer
-	mov	$0x10, %ax		# 0x10 is the offset in the GDT to our data segment
+	lgdt _gdtptr			# Load the GDT with our '_gp' which is a special pointer
+	mov	$0x10, %ax			# 0x10 is the offset in the GDT to our data segment
 	mov	%ax, %ds
 	mov	%ax, %es
 	mov	%ax, %fs
 	mov	%ax, %gs
 	mov	%ax, %ss
-	ljmp $0x08, $Flush2	# 0x08 is the offset to our code segment: Far jump!
+	ljmp $0x08, $Flush2		# 0x08 is the offset to our code segment: Far jump!
 Flush2:
-	ret					# Returns back to the C code!
+	ret						# Returns back to the C code!
 
 # Loads the IDT defined in '_idtp' into the processor.
 # This is declared in C as 'extern void idt_load();'

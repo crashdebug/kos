@@ -1,6 +1,7 @@
 #include <memory.h>
 #include <new.h>
 #include <pagemap.h>
+#include <stdio.h>
 
 // Size of each page in bytes
 //unsigned short iPageSize = 0x1000;
@@ -17,11 +18,7 @@ void MemoryManager::Initialize(multiboot_info_t* mbd)
 	multiboot_memory_map_t* mmap = (multiboot_memory_map_t*)mbd->mmap_addr;
 	while (mmap < (multiboot_memory_map_t*)(mbd->mmap_addr + mbd->mmap_length))
 	{
-		if ((mmap->type & MULTIBOOT_MEMORY_AVAILABLE) != MULTIBOOT_MEMORY_AVAILABLE)
-		{
-			continue;
-		}
-		if (largestPage == 0 || mmap->len > largestSize)
+		if ((mmap->type & MULTIBOOT_MEMORY_AVAILABLE) == MULTIBOOT_MEMORY_AVAILABLE && (largestPage == 0 || mmap->len > largestSize))
 		{
 			largestPage = (unsigned char*)mmap->addr;
 			largestSize = mmap->len;
@@ -35,12 +32,13 @@ void MemoryManager::Initialize(multiboot_info_t* mbd)
 
 	// Small object heap ( <= 256 bytes )
 	aPageMaps[0] = new (largestPage) PageBitmap((unsigned char*)aPageMaps + 0x1000, (largestSize - 0x1000) / 2, 256);
-	largestPage += sizeof(PageBitmap);
+	largestPage += sizeof(PageBitmap*);
+
 	// Large object heap ( > 256 bytes )
 	aPageMaps[1] = new (largestPage) PageBlockmap((unsigned char*)aPageMaps + 0x1000 + (largestSize - 0x1000) / 2, (largestSize - 0x1000) / 2, 1024);
-	largestPage += sizeof(PageBlockmap);
+	largestPage += sizeof(PageBlockmap*);
 
-//	Console.WriteDebug( DEBUG_LEVEL_MESSAGE, "MemoryManager::Initialize( )", "Largest page is @ %8x of %i bytes.", pMemPages[iLargestPage].iBaseAddress, pMemPages[iLargestPage].iLength );
+	printf("MemoryManager initialized (%i bytes available)\n", largestSize);
 }
 
 void* MemoryManager::MemAlloc(long unsigned int iSize)
