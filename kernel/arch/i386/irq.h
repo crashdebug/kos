@@ -4,12 +4,20 @@
 
 #include "registers.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void disableInterrupts();
 void enableInterrupts();
 void install_irq();
-void installHandler(int irq, void(*handler)(struct Registers*));
-void uninstallHandler(int irq);
-void waitForIRQ(int irq);
+void install_irq_handler(int irq, void(*handler)(struct Registers*));
+void uninstall_irq_handler(int irq);
+void wait_for_irq(int irq);
+
+#ifdef __cplusplus
+}
+#endif
 
 struct IRQCallback
 {

@@ -19,7 +19,7 @@ BINS?=../tools/bin/$(HOST)-
 CPPFLAGS?=
 endif
 
-CFLAGS:=$(CFLAGS) -Wall -Wextra
+CFLAGS:=$(CFLAGS) -Wall -Wextra -Iinclude
 LIBK_CFLAGS:=$(CFLAGS) -ffreestanding -fbuiltin
 LIBK_CPPFLAGS:=$(CPPFLAGS) -D__kos_kernel
  
@@ -35,6 +35,7 @@ LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 FREEOBJS:=\
 $(ARCH_FREEOBJS) \
 string.o \
+time.o \
 stdio/printf.o \
 
 HOSTEDOBJS:=\

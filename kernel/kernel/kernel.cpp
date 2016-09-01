@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <terminal.h>
 #include <multiboot.h>
+#include <time.h>
 
 /* Check if the compiler thinks we are targeting the wrong operating system. */ 
 #if defined(__linux__) 
@@ -17,9 +18,22 @@
 extern "C" {
 #endif
 
+unsigned long long _time = 0;
+extern void set_time_fn(time_t(*fn)(void));
+
+unsigned long long ticks()
+{
+	return _time;
+}
+
+void set_ticks(unsigned long long t)
+{
+	_time = t;
+}
+
 void kernel_early()
 {
-	
+	set_time_fn(&ticks);
 }
 
 void kernel_main(multiboot_info_t* mbd, uint32_t magic)

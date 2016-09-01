@@ -78,21 +78,21 @@ void install_irq()
 }
 
 // Installs a custom IRQ handler for the given IRQ.
-void installHandler(int irq, void (*handler)(struct Registers*))
+void install_irq_handler(int irq, void (*handler)(struct Registers*))
 {
 	aIRQs[irq].handler = handler;
 	aIRQs[irq].count = 0;
 }
 
 // Clears the handler for a given IRQ.
-void uninstallHandler(int irq)
+void uninstall_irq_handler(int irq)
 {
     aIRQs[irq].handler = 0;
 }
 
-void waitForIRQ(int irq)
+void wait_for_irq(int irq)
 {
-	while ( aIRQs[irq].count == 0 ) ;
+	while (aIRQs[irq].count == 0) ;
 	aIRQs[irq].count--;
 }
 
