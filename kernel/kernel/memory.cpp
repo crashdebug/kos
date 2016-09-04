@@ -8,55 +8,61 @@
 // Total number of pages available
 //unsigned int iTotalPages;
 
-IPageMap** aPageMaps = 0;
+IPageMap** g_pageMaps = 0;
+unsigned long long g_memsize = 0;
 
 void MemoryManager::Initialize(multiboot_info_t* mbd)
 {
 	// Find the largest page
 	unsigned char* largestPage = 0;
-	unsigned int largestSize = 0;
 	multiboot_memory_map_t* mmap = (multiboot_memory_map_t*)mbd->mmap_addr;
 	while (mmap < (multiboot_memory_map_t*)(mbd->mmap_addr + mbd->mmap_length))
 	{
-		if ((mmap->type & MULTIBOOT_MEMORY_AVAILABLE) == MULTIBOOT_MEMORY_AVAILABLE && (largestPage == 0 || mmap->len > largestSize))
+		if ((mmap->type & MULTIBOOT_MEMORY_AVAILABLE) == MULTIBOOT_MEMORY_AVAILABLE && (largestPage == 0 || mmap->len > g_memsize))
 		{
 			largestPage = (unsigned char*)mmap->addr;
-			largestSize = mmap->len;
+			g_memsize = mmap->len;
 		}
 		mmap = (multiboot_memory_map_t*)((unsigned int)mmap + mmap->size + sizeof(unsigned int));
 	}
 
 	// Allocate memory for two heaps
-	aPageMaps = (IPageMap**)largestPage;
-	largestPage += 24;
+	g_pageMaps = (IPageMap**)largestPage;
+	largestPage += sizeof(void*) * 3;
 
 	// Small object heap ( <= 256 bytes )
-	aPageMaps[0] = new (largestPage) PageBitmap((unsigned char*)aPageMaps + 0x1000, (largestSize - 0x1000) / 2, 256);
+	g_pageMaps[0] = new (largestPage) PageBitmap((unsigned char*)g_pageMaps + 0x1000, (g_memsize - 0x1000) / 2, 256);
 	largestPage += sizeof(PageBitmap*);
 
 	// Large object heap ( > 256 bytes )
-	aPageMaps[1] = new (largestPage) PageBlockmap((unsigned char*)aPageMaps + 0x1000 + (largestSize - 0x1000) / 2, (largestSize - 0x1000) / 2, 1024);
+	g_pageMaps[1] = new (largestPage) PageBlockmap((unsigned char*)g_pageMaps + 0x1000 + (g_memsize - 0x1000) / 2, (g_memsize - 0x1000) / 2, 1024);
 	largestPage += sizeof(PageBlockmap*);
 
-	printf("MemoryManager initialized (%i bytes available)\n", largestSize);
+	// Terminate list
+	g_pageMaps[2] = 0;
 }
 
-void* MemoryManager::MemAlloc(long unsigned int iSize)
+unsigned long long MemoryManager::Available()
 {
-	if (aPageMaps == 0)
+	return g_memsize;
+}
+
+void* MemoryManager::MemAlloc(long unsigned int size)
+{
+	if (g_pageMaps == 0)
 	{
 		return 0;
 	}
 
 	unsigned char i = 0;
-	void* pAddress;
-	while (aPageMaps[i] != 0)
+	void* p;
+	while (g_pageMaps[i] != 0)
 	{
-		// TODO: If allocation fails, try the next heap
+		// TODO: If allocation fails, try the next heap, or resize heaps.
 		// Find a pagemap big enough to hold the requested size
-		if (iSize <= aPageMaps[i]->GetMaxSize() && aPageMaps[i]->Allocate(iSize, &pAddress))
+		if (size <= g_pageMaps[i]->GetMaxSize() && g_pageMaps[i]->Allocate(size, &p))
 		{
-			return pAddress;
+			return p;
 		}
 		i++;
 	}
@@ -65,15 +71,15 @@ void* MemoryManager::MemAlloc(long unsigned int iSize)
 
 void MemoryManager::MemFree(void* p)
 {
-	if (aPageMaps == 0)
+	if (g_pageMaps == 0)
 	{
 		return;
 	}
 
 	unsigned char i = 0;
-	while (aPageMaps[i] != 0)
+	while (g_pageMaps[i] != 0)
 	{
-		if (aPageMaps[i]->IsInScope(p) && aPageMaps[i]->Free(p))
+		if (g_pageMaps[i]->IsInScope(p) && g_pageMaps[i]->Free(p))
 		{
 			break;
 		}

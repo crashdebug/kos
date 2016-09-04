@@ -54,12 +54,21 @@ void Terminal::putEntryAt(char c, uint8_t color, size_t x, size_t y)
 
 void Terminal::putChar(char c)
 {
-	if (c == '\n') {
+	if (c == '\n')
+	{
 		terminal_row++;
 		terminal_column = -1;
-	} else if (c == '\t') {
+	}
+	else if (c == '\r')
+	{
+		terminal_column = -1;
+	}
+	else if (c == '\t')
+	{
 		terminal_column += 4; 
-	} else {
+	}
+	else
+	{
 		putEntryAt(c, terminal_color, terminal_column, terminal_row);
 	}
 	if (++terminal_column >= terminal_width) {

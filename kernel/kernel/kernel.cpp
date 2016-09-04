@@ -41,6 +41,7 @@ void kernel_early(multiboot_info_t* mbd, uint32_t magic)
 	printf("BootInfo: 0x%8x, Magic: 0x%x\n", mbd, magic);
 
 	MemoryManager::Initialize(mbd);
+	printf("MemoryManager initialized (%i kb available)\n", MemoryManager::Available() / 1024);
 }
 
 void kernel_main()
@@ -56,6 +57,16 @@ void kernel_main()
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLACK);
 }
 
+void __cxa_finalize(void *)
+{
+}
+
+int __cxa_atexit(void (*)(void *), void *, void *)
+{
+	return 0;
+}
+
+// Called when a virtual method has not been overriddent.
 void __cxa_pure_virtual()
 {
     // Do nothing or print an error message.

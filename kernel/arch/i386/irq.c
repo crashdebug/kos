@@ -1,99 +1,23 @@
 #include "idt.h"
 #include "irq.h"
 #include "util.h"
-
-extern void _irq0();
-extern void _irq1();
-extern void _irq2();
-extern void _irq3();
-extern void _irq4();
-extern void _irq5();
-extern void _irq6();
-extern void _irq7();
-extern void _irq8();
-extern void _irq9();
-extern void _irq10();
-extern void _irq11();
-extern void _irq12();
-extern void _irq13();
-extern void _irq14();
-extern void _irq15();
+#include "pic.h"
+#include <string.h>
 
 // This array is actually an array of function pointers.
 // They're used to handle custom IRQ handlers for a given IRQ.
-struct IRQCallback aIRQs[16];
+struct IRQCallback s_irqs[16];
 
 // Enables interrupts
-void enableInterrupts( )
+void enable_interrupts( )
 {
     __asm__ __volatile__( "sti" );
 }
 
 // Enables interrupts
-void disableInterrupts( )
+void disable_interrupts( )
 {
     __asm__ __volatile__( "cli" );
-}
-
-// Normally, IRQs 0 to 7 are mapped to entries 8 to 15.
-// This is a problem in protected mode, because IDT entry 8 is a Double Fault!
-// Without remapping, every time IRQ0 fires, you get a Double Fault Exception,
-// which is NOT actually what's happening. We send commands to the Programmable
-// Interrupt Controller (PICs - also called the 8259's) in  order to make
-// IRQ0 to 15 be remapped to IDT entries 32 to 47
-void irq_remap( )
-{
-    outportb(0x20, 0x11);
-    outportb(0xA0, 0x11);
-    outportb(0x21, 0x20);
-    outportb(0xA1, 0x28);
-    outportb(0x21, 0x04);
-    outportb(0xA1, 0x02);
-    outportb(0x21, 0x01);
-    outportb(0xA1, 0x01);
-    outportb(0x21, 0x00);
-    outportb(0xA1, 0x00);
-}
-
-void install_irq()
-{
-	irq_remap();
-
-	set_idt_gate(32, (unsigned)_irq0, 0x08, 0x8E);
-	set_idt_gate(33, (unsigned)_irq1, 0x08, 0x8E);
-	set_idt_gate(34, (unsigned)_irq2, 0x08, 0x8E);
-	set_idt_gate(35, (unsigned)_irq3, 0x08, 0x8E);
-	set_idt_gate(36, (unsigned)_irq4, 0x08, 0x8E);
-	set_idt_gate(37, (unsigned)_irq5, 0x08, 0x8E);
-	set_idt_gate(38, (unsigned)_irq6, 0x08, 0x8E);
-	set_idt_gate(39, (unsigned)_irq7, 0x08, 0x8E);
-	set_idt_gate(40, (unsigned)_irq8, 0x08, 0x8E);
-	set_idt_gate(41, (unsigned)_irq9, 0x08, 0x8E);
-	set_idt_gate(42, (unsigned)_irq10, 0x08, 0x8E);
-	set_idt_gate(43, (unsigned)_irq11, 0x08, 0x8E);
-	set_idt_gate(44, (unsigned)_irq12, 0x08, 0x8E);
-	set_idt_gate(45, (unsigned)_irq13, 0x08, 0x8E);
-	set_idt_gate(46, (unsigned)_irq14, 0x08, 0x8E);
-    set_idt_gate(47, (unsigned)_irq15, 0x08, 0x8E);
-}
-
-// Installs a custom IRQ handler for the given IRQ.
-void install_irq_handler(int irq, void (*handler)(struct Registers*))
-{
-	aIRQs[irq].handler = handler;
-	aIRQs[irq].count = 0;
-}
-
-// Clears the handler for a given IRQ.
-void uninstall_irq_handler(int irq)
-{
-    aIRQs[irq].handler = 0;
-}
-
-void wait_for_irq(int irq)
-{
-	while (aIRQs[irq].count == 0) ;
-	aIRQs[irq].count--;
 }
 
 // Each of the IRQ ISRs point to this function, rather than the "FaultHandler" in Kernel.cpp.
@@ -103,24 +27,85 @@ void wait_for_irq(int irq)
 // If the second controller (an IRQ from 8 to 15) gets an interrupt, you need to acknowledge the
 // interrupt at BOTH controllers, otherwise, you only send an EOI command to the first controller.
 // If you don't send an EOI, system won't raise any more IRQs
-void _IRQHandler(struct Registers *regs)
+void irqfunc(uint32_t irq, void* ctx)
 {
-	// Find out if we have a custom handler to run for this IRQ...
-	aIRQs[regs->int_no - 32].count++;
+	// Is the interrupt handler installed?
+	if (s_irqs[irq].handler == 0) return;
 
-	if (aIRQs[regs->int_no - 32].handler)
+	// Find out if we have a custom handler to run for this IRQ...
+	s_irqs[irq].count++;
+
+	if (s_irqs[irq].handler)
 	{
 		// Call the function
-		aIRQs[regs->int_no - 32].handler(regs);
+		s_irqs[irq].handler(ctx);
 	}
 
-	// If the IDT entry that was invoked was greater than 40 (meaning IRQ8 - 15),
-	// then we need to send an EOI to the slave controller.
-	if (regs->int_no >= 40)
-	{
-		outportb(0xA0, 0x20);
-	}
-
-	// In either case, we need to send an EOI to the master interrupt controller too
-	outportb(0x20, 0x20);
+	send_pic_eoi((unsigned char)irq);
 }
+
+// Define low level IRQ handlers. These functions will call 
+DEFIRQWRAPPER(0)
+DEFIRQWRAPPER(1)
+DEFIRQWRAPPER(2)
+DEFIRQWRAPPER(3)
+DEFIRQWRAPPER(4)
+DEFIRQWRAPPER(5)
+DEFIRQWRAPPER(6)
+DEFIRQWRAPPER(7)
+DEFIRQWRAPPER(8)
+DEFIRQWRAPPER(9)
+DEFIRQWRAPPER(10)
+DEFIRQWRAPPER(11)
+DEFIRQWRAPPER(12)
+DEFIRQWRAPPER(13)
+DEFIRQWRAPPER(14)
+DEFIRQWRAPPER(15)
+
+void install_irq()
+{
+    memset(&s_irqs, 0, sizeof(struct IRQCallback) * 16);
+
+	// Map IRQs from 0...15 to 32...47
+	pic_remap(0x20, 0x28);
+
+	// Install IRQ handlers
+	set_idt_gate(0x20, (unsigned long)irq0handler(), 0x08, 0x8e);
+	set_idt_gate(0x21, (unsigned long)irq1handler(), 0x08, 0x8E);
+	set_idt_gate(0x22, (unsigned long)irq2handler(), 0x08, 0x8E);
+	set_idt_gate(0x23, (unsigned long)irq3handler(), 0x08, 0x8E);
+	set_idt_gate(0x24, (unsigned long)irq4handler(), 0x08, 0x8E);
+	set_idt_gate(0x25, (unsigned long)irq5handler(), 0x08, 0x8E);
+	set_idt_gate(0x26, (unsigned long)irq6handler(), 0x08, 0x8E);
+	set_idt_gate(0x27, (unsigned long)irq7handler(), 0x08, 0x8E);
+	set_idt_gate(0x28, (unsigned long)irq8handler(), 0x08, 0x8E);
+	set_idt_gate(0x29, (unsigned long)irq9handler(), 0x08, 0x8E);
+	set_idt_gate(0x2a, (unsigned long)irq10handler(), 0x08, 0x8E);
+	set_idt_gate(0x2b, (unsigned long)irq11handler(), 0x08, 0x8E);
+	set_idt_gate(0x2c, (unsigned long)irq12handler(), 0x08, 0x8E);
+	set_idt_gate(0x2d, (unsigned long)irq13handler(), 0x08, 0x8E);
+	set_idt_gate(0x2e, (unsigned long)irq14handler(), 0x08, 0x8E);
+    set_idt_gate(0x2f, (unsigned long)irq15handler(), 0x08, 0x8E);
+}
+
+// Installs a custom IRQ handler for the given IRQ.
+void install_irq_handler(int irq, void (*handler)(void*))
+{
+	s_irqs[irq].handler = handler;
+	s_irqs[irq].count = 0;
+}
+
+// Clears the handler for a given IRQ.
+void uninstall_irq_handler(int irq)
+{
+    s_irqs[irq].handler = 0;
+}
+
+void wait_for_irq(int irq)
+{
+	if (s_irqs[irq].handler == 0) return;
+
+	while (s_irqs[irq].count == 0) ;
+	s_irqs[irq].count--;
+}
+
