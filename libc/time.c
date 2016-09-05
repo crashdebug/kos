@@ -19,6 +19,10 @@ void set_time_fn(time_t(*fn)(void))
 
 time_t time(time_t* arg)
 {
+	if (s_ticksf == 0)
+	{
+		return 0;
+	}
 	time_t t(s_ticksf());
 	if (arg != 0)
 	{
@@ -161,13 +165,25 @@ int seconds(time_t* remain)
 struct tm* gmtime(const time_t *time)
 {
 	tm* t = new tm;
-	time_t temp = *time;
-	t->tm_year = year(&temp);
-	t->tm_mon = month(&temp, is_leap_year(t->tm_year));
-	t->tm_mday = day(&temp);
-	t->tm_hour = hours(&temp);
-	t->tm_min = minutes(&temp);
-	t->tm_sec = seconds(&temp);
+	if (*time > 0)
+	{
+		time_t temp = *time;
+		t->tm_year = year(&temp);
+		t->tm_mon = month(&temp, is_leap_year(t->tm_year));
+		t->tm_mday = day(&temp);
+		t->tm_hour = hours(&temp);
+		t->tm_min = minutes(&temp);
+		t->tm_sec = seconds(&temp);
+	}
+	else
+	{
+		t->tm_year = 0;
+		t->tm_mon = 0;
+		t->tm_mday = 0;
+		t->tm_hour = 0;
+		t->tm_min = 0;
+		t->tm_sec = 0;
+	}
 	return t;
 }
 

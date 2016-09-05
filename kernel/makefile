@@ -46,6 +46,9 @@ kernel/pagebitmap.o \
 kernel/pageblockmap.o \
 kernel/new.o \
 
+TEMPLATES:=\
+include/vector.h \
+
 CRTI_OBJ:=$(ARCHDIR)/crti.o
 CRTBEGIN_OBJ:=$(shell $(BINS)$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
 CRTEND_OBJ:=$(shell $(BINS)$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtend.o)

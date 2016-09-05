@@ -92,6 +92,9 @@ _start:
 	# Call the global constructors.
 	call _init
 
+	# Install drivers before calling kernel_main().
+	call install_timer
+
 	# Enable interrupts
 	sti
 

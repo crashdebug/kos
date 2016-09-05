@@ -4,6 +4,8 @@
 #include <multiboot.h>
 #include <time.h>
 #include <memory.h>
+#include <vector.h>
+#include <idriver.h>
 
 /* Check if the compiler thinks we are targeting the wrong operating system. */ 
 #if defined(__linux__) 
@@ -15,6 +17,7 @@
 #error "This needs to be compiled with a ix86-elf compiler" 
 #endif
 
+vector<IDriver*> _drivers;
 unsigned long long _time = 0;
 
 #ifdef __cplusplus
@@ -33,6 +36,11 @@ void set_ticks(unsigned long long t)
 	_time = t;
 }
 
+void install_driver(IDriver* driver)
+{
+	_drivers.push_back(driver);
+}
+
 void kernel_early(multiboot_info_t* mbd, uint32_t magic)
 {
 	set_time_fn(&ticks);
@@ -46,6 +54,11 @@ void kernel_early(multiboot_info_t* mbd, uint32_t magic)
 
 void kernel_main()
 {
+	for (unsigned int i = 0; i < _drivers.size(); i++)
+	{
+		_drivers.at(i)->install();
+	}
+
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLUE);
 	printf("[");
 	Terminal::setColor(Terminal::Color::COLOR_WHITE, Terminal::Color::COLOR_BLUE);
@@ -55,6 +68,16 @@ void kernel_main()
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLUE);
 	printf("]\n");
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLACK);
+
+	unsigned long long l = 0;
+	while (true)
+	{
+		time_t t = time(0);
+		struct tm* time = gmtime(&t);
+		printf("\rDate: %2i.%2i.%4i %2i:%2i:%2i [%i]", time->tm_mday, time->tm_mon, time->tm_year, time->tm_hour, time->tm_min, time->tm_sec, l);
+		delete time;
+		l++;
+	}
 }
 
 void __cxa_finalize(void *)
