@@ -2,6 +2,10 @@
 #ifndef _GDT_H
 #define _GDT_H 1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Defines a GDT entry.
 struct GDTEntry
 {
@@ -25,5 +29,9 @@ struct GDTPtr
 
 void install_gdt();
 void set_gdt_gate(int num, unsigned long base, unsigned long limit, unsigned char access, unsigned char granularity);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

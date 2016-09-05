@@ -4,6 +4,10 @@
 #include "pic.h"
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // This array is actually an array of function pointers.
 // They're used to handle custom IRQ handlers for a given IRQ.
 struct IRQCallback s_irqs[16];
@@ -109,3 +113,6 @@ void wait_for_irq(int irq)
 	s_irqs[irq].count--;
 }
 
+#ifdef __cplusplus
+}
+#endif

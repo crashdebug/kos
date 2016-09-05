@@ -69,7 +69,6 @@ void formatNumber(long num, unsigned char radix, int width, char pad, void (*put
 namespace kos {
 #endif
 
-//void printf(void (*putchr)(char), const char* text, va_list args)
 int printf(const char* __restrict text, ...)
 {
 	va_list args;

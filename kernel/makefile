@@ -13,7 +13,7 @@ CPPFLAGS=-DTEST -D__lib -fpermissive
 LIBFLAGS=$(BUILDDIR)/libk.a BINS= CPPFLAGS="-D TEST -D__kos_libc -Iinclude"
 endif
 
-CC=gcc
+CC=g++
 CPP=g++
 AR=ar
 AS=as
@@ -79,7 +79,7 @@ $(BUILDDIR)/kernel/%.o: %.cpp
 	$(BINS)$(CPP) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 $(BUILDDIR)/kernel/%.o: %.c
-	$(BINS)$(CC) -c $< -o $@ -std=gnu11 $(CFLAGS)
+	$(BINS)$(CC) -c $< -o $@ $(CFLAGS)
 
 $(BUILDDIR)/kernel/%.o: %.s
 	$(BINS)$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)

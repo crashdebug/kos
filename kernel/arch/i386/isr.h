@@ -1,5 +1,6 @@
-#ifndef ISR_H
-#define ISR_H
+#pragma once
+#ifndef _ISR_H
+#define _ISR_H 1
 
 #include <stdint.h>
 
@@ -84,6 +85,14 @@ void *int##intnum##handler(void)\
 	return((void *) addr);\
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void install_isr();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

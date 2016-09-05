@@ -1,7 +1,11 @@
-#include "idt.h"
 #include "isr.h"
-#include "registers.h"
+#include "idt.h"
+//#include "registers.h"
 #include <stdio.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // This contains the messages that correspond to each and every exception.
 // We get the correct message by accessing like: exceptionMessages[interrupt_number]
@@ -26,22 +30,22 @@ const char * exceptionMessages[] =
 	"Coprocessor Fault",
 };
 
-//this function is called in all the software interrupts, and in exceptions without error code
-//it will call the corresponding function in the intfuncs array, as long as it's not NULL
-//if the called function returns a non-NULL pointer, that pointer will be used as a stack to switch the task
+// This function is called in all the software interrupts, and in exceptions without error code.
+// It will call the corresponding function in the intfuncs array, as long as it's not NULL.
+// If the called function returns a non-NULL pointer, that pointer will be used as a stack to switch the task.
 void intfunc(uint32_t intnum, void *ctx)
 {
-    printf("Exception 0x%2x: %s! System halted.", intnum, exceptionMessages[intnum]);
-    while(true);
+	printf("Exception 0x%2lx: %s! System halted.", intnum, exceptionMessages[intnum]);
+	while(1 == 1);
 }
- 
-//this function is called in exceptions with error code
-//it will call the corresponding function in the intfuncs_err array, as long as it's not NULL
-//if the called function returns a non-NULL pointer, that pointer will be used as a stack to switch the task
+
+// This function is called in exceptions with error code.
+// It will call the corresponding function in the intfuncs_err array, as long as it's not NULL.
+// If the called function returns a non-NULL pointer, that pointer will be used as a stack to switch the task.
 void intfunc_err(uint32_t intnum, void *ctx, uint32_t errcode)
 {
-    printf("Exception 0x%2x: %s; %i! System halted.", intnum, exceptionMessages[intnum], errcode);
-    while(true);
+	printf("Exception 0x%2lx: %s; %li! System halted.", intnum, exceptionMessages[intnum], errcode);
+	while(1 == 1);
 }
 
 // Exceptions without error code
@@ -72,22 +76,26 @@ DEFINTWRAPPER(0x80) // system call
 // and has the lower 5 bits set to the required '14', which is represented by 'E' in hex.
 void install_isr()
 {
-    set_idt_gate(0, (unsigned long)int0handler(), 0x08, 0x8E);
-    set_idt_gate(1, (unsigned long)int1handler(), 0x08, 0x8E);
-    set_idt_gate(2, (unsigned long)int2handler(), 0x08, 0x8E);
-    set_idt_gate(3, (unsigned long)int3handler(), 0x08, 0x8E);
-    set_idt_gate(4, (unsigned long)int4handler(), 0x08, 0x8E);
-    set_idt_gate(5, (unsigned long)int5handler(), 0x08, 0x8E);
-    set_idt_gate(6, (unsigned long)int6handler(), 0x08, 0x8E);
-    set_idt_gate(7, (unsigned long)int7handler(), 0x08, 0x8E);
-    set_idt_gate(8, (unsigned long)int8handler(), 0x08, 0x8E);
-    set_idt_gate(9, (unsigned long)int9handler(), 0x08, 0x8E);
-    set_idt_gate(10, (unsigned long)int10handler(), 0x08, 0x8E);
-    set_idt_gate(11, (unsigned long)int11handler(), 0x08, 0x8E);
-    set_idt_gate(12, (unsigned long)int12handler(), 0x08, 0x8E);
-    set_idt_gate(13, (unsigned long)int13handler(), 0x08, 0x8E);
-    set_idt_gate(14, (unsigned long)int14handler(), 0x08, 0x8E);
-    set_idt_gate(16, (unsigned long)int16handler(), 0x08, 0x8E);
+	set_idt_gate(0, (unsigned long)int0handler(), 0x08, 0x8E);
+	set_idt_gate(1, (unsigned long)int1handler(), 0x08, 0x8E);
+	set_idt_gate(2, (unsigned long)int2handler(), 0x08, 0x8E);
+	set_idt_gate(3, (unsigned long)int3handler(), 0x08, 0x8E);
+	set_idt_gate(4, (unsigned long)int4handler(), 0x08, 0x8E);
+	set_idt_gate(5, (unsigned long)int5handler(), 0x08, 0x8E);
+	set_idt_gate(6, (unsigned long)int6handler(), 0x08, 0x8E);
+	set_idt_gate(7, (unsigned long)int7handler(), 0x08, 0x8E);
+	set_idt_gate(8, (unsigned long)int8handler(), 0x08, 0x8E);
+	set_idt_gate(9, (unsigned long)int9handler(), 0x08, 0x8E);
+	set_idt_gate(10, (unsigned long)int10handler(), 0x08, 0x8E);
+	set_idt_gate(11, (unsigned long)int11handler(), 0x08, 0x8E);
+	set_idt_gate(12, (unsigned long)int12handler(), 0x08, 0x8E);
+	set_idt_gate(13, (unsigned long)int13handler(), 0x08, 0x8E);
+	set_idt_gate(14, (unsigned long)int14handler(), 0x08, 0x8E);
+	set_idt_gate(16, (unsigned long)int16handler(), 0x08, 0x8E);
 
-    set_idt_gate(0x80, (unsigned long)int0x80handler(), 0x08, 0x8E);
+	set_idt_gate(0x80, (unsigned long)int0x80handler(), 0x08, 0x8E);
 }
+
+#ifdef __cplusplus
+}
+#endif

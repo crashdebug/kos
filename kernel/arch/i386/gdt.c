@@ -1,9 +1,13 @@
 #include "gdt.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct GDTEntry aGDT[3];
 struct GDTPtr _gdtptr;
 
-// In arch/.../boot.s
+// Defined in boot.s
 // Used to properly reload the new segment registers.
 extern void _GDTFlush();
 
@@ -49,3 +53,7 @@ void install_gdt()
     // Flush out the old GDT and install the new changes!
     _GDTFlush();
 }
+
+#ifdef __cplusplus
+}
+#endif

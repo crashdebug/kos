@@ -2,6 +2,10 @@
 #ifndef _IDT_H
 #define _IDT_H 1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Defines an IDT entry
 struct IDTEntry
 {
@@ -22,5 +26,9 @@ struct IDTPtr
 
 void install_idt();
 void set_idt_gate(unsigned char num, unsigned long base, unsigned short selector, unsigned char flags);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
