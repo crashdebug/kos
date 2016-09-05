@@ -43,56 +43,56 @@ void getDateTime(int* year, int* month, int* day, int* hours, int* minutes, int*
 	// Wait until RTC becomes available to read
 	while (true)
 	{
-		outportb(RTC_ADDRESS_PORT, 0x0a);
-		if ((inportb(RTC_DATA_PORT) & 0x80) != 0x80)
+		outb(RTC_ADDRESS_PORT, 0x0a);
+		if ((inb(RTC_DATA_PORT) & 0x80) != 0x80)
 			break;
 	}
 
 	unsigned char temp;
 
 	// Get seconds
-	outportb(RTC_ADDRESS_PORT, RTC_SECOND_REGISTER);
-	temp = inportb( RTC_DATA_PORT);
+	outb(RTC_ADDRESS_PORT, RTC_SECOND_REGISTER);
+	temp = inb( RTC_DATA_PORT);
 	// Check if BCD is used
 	if (bcd && !convertFromBCD(temp, &temp))
 		bcd = false;
 	*seconds = temp;
 
 	// Get minutes
-	outportb(RTC_ADDRESS_PORT, RTC_MINUTE_REGISTER);
-	temp = inportb(RTC_DATA_PORT);
+	outb(RTC_ADDRESS_PORT, RTC_MINUTE_REGISTER);
+	temp = inb(RTC_DATA_PORT);
 	// Check if BCD is used
 	if (bcd && !convertFromBCD(temp, &temp))
 		bcd = false;
 	*minutes = temp;
 
 	// Get hours
-	outportb(RTC_ADDRESS_PORT, RTC_HOUR_REGISTER);
-	temp = inportb(RTC_DATA_PORT);
+	outb(RTC_ADDRESS_PORT, RTC_HOUR_REGISTER);
+	temp = inb(RTC_DATA_PORT);
 	// Check if BCD is used
 	if (bcd && !convertFromBCD(temp, &temp))
 		bcd = false;
 	*hours = temp;
 
 	// Get day
-	outportb(RTC_ADDRESS_PORT, RTC_DAY_REGISTER);
-	temp = inportb(RTC_DATA_PORT);
+	outb(RTC_ADDRESS_PORT, RTC_DAY_REGISTER);
+	temp = inb(RTC_DATA_PORT);
 	// Check if BCD is used
 	if (bcd && !convertFromBCD(temp, &temp))
 		bcd = false;
 	*day = temp;
 
 	// Get month
-	outportb(RTC_ADDRESS_PORT, RTC_MONTH_REGISTER);
-	temp = inportb(RTC_DATA_PORT);
+	outb(RTC_ADDRESS_PORT, RTC_MONTH_REGISTER);
+	temp = inb(RTC_DATA_PORT);
 	// Check if BCD is used
 	if (bcd && !convertFromBCD(temp, &temp))
 		bcd = false;
 	*month = temp;
 
 	// Get year
-	outportb(RTC_ADDRESS_PORT, RTC_YEAR_REGISTER);
-	temp = inportb(RTC_DATA_PORT);
+	outb(RTC_ADDRESS_PORT, RTC_YEAR_REGISTER);
+	temp = inb(RTC_DATA_PORT);
 	// Check if BCD is used
 	if (bcd && !convertFromBCD(temp, &temp))
 		bcd = false;
