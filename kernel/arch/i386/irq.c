@@ -70,7 +70,7 @@ void install_irq()
 	pic_remap(0x20, 0x28);
 
 	// Install IRQ handlers
-	set_idt_gate(0x20, (unsigned long)irq0handler(), 0x08, 0x8e);
+	set_idt_gate(0x20, (unsigned long)irq0handler(), 0x08, 0x8E);
 	set_idt_gate(0x21, (unsigned long)irq1handler(), 0x08, 0x8E);
 	set_idt_gate(0x22, (unsigned long)irq2handler(), 0x08, 0x8E);
 	set_idt_gate(0x23, (unsigned long)irq3handler(), 0x08, 0x8E);
