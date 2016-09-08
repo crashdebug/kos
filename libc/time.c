@@ -19,10 +19,6 @@ void set_time_fn(time_t(*fn)(void))
 
 time_t time(time_t* arg)
 {
-	if (s_ticksf == 0)
-	{
-		return 0;
-	}
 	time_t t(s_ticksf());
 	if (arg != 0)
 	{

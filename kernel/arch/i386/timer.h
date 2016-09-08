@@ -4,8 +4,6 @@
 
 #include <idriver.h>
 
-#define TIMER_E	( 3000.0 / 3579545 )
-
 extern "C" void install_timer();
 
 class Timer : public IDriver
