@@ -5,30 +5,24 @@
 #include <kernel.h>
 #include "util.h"
 
-#define TIMER_E	( 3000.0 / 3579545 )
-float frequency = 10000; // Hz
+#define TIMER_E	(3579545.0 / 3.0)
+// Timer frequency in Hz
+#define frequency 10000
 
-static time_t last_rtc_refresh = 0;
+// Get the current time from BIOS/CMOS/RTC
+time_t query_rtc()
+{
+	struct tm t;
+	getDateTime(&t.tm_year, &t.tm_mon, &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec);
+	return mktime(&t);
+}
 
 // Handles the timer.
-// Increments the 'iTimeTicks' variable every time the timer fires.
+// Increments the 'ticks' variable every time the timer fires.
 void TimerHandler(void*)
 {
-	if (last_rtc_refresh < 100)
-	{
-		unsigned long long t = ticks();
-		t++;
-		set_ticks(t);
-	}
-	else
-	{
-		// Get the current time from BIOS/CMOS/RTC
-		struct tm t;
-		getDateTime(&t.tm_year, &t.tm_mon, &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec);
-		set_ticks(mktime(&t));
-		last_rtc_refresh = 0;
-	}
-	last_rtc_refresh++;
+	time_t t = query_rtc();
+	set_ticks(t);
 }
 
 // Tells the kernel about the Timer driver. 
@@ -43,12 +37,18 @@ void Timer::install()
 	// Install the tick handler
     install_irq_handler(0, TimerHandler);
 
-	// Get the current time from BIOS/CMOS/RTC
-	struct tm t;
-	getDateTime(&t.tm_year, &t.tm_mon, &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec);
-	set_ticks(mktime(&t));
+	// Inform kernel what time it is
+	set_ticks(query_rtc());
 
-	unsigned int divisor = (unsigned int)((3579545.0 / 3.0) / frequency);
+	// TODO: Check for APIC
+	uint32_t eax, edx;
+	cpuid(1, &eax, &edx);
+	if ((edx & CPUID_FEAT_EDX_APIC) == CPUID_FEAT_EDX_APIC)
+	{
+	}
+
+	// Install PIT
+	unsigned int divisor = (unsigned int)((TIMER_E) / frequency);
 	// Set up the tick frequency
 	for (unsigned char i = 0; i < 5; i++)
 	{

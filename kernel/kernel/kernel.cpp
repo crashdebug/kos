@@ -12,7 +12,7 @@
 #error "You are not using a cross-compiler" 
 #endif
 
-/* This tutorial will only work for the 32-bit ix86 targets. */ 
+/* This will only work for the 32-bit ix86 targets. */ 
 #if !defined(__i386__) 
 #error "This needs to be compiled with a ix86-elf compiler" 
 #endif
@@ -23,8 +23,6 @@ unsigned long long _time = 0;
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-extern void set_time_fn(time_t(*fn)(void));
 
 unsigned long long ticks()
 {
@@ -43,8 +41,6 @@ void install_driver(IDriver* driver)
 
 void kernel_early(multiboot_info_t* mbd, uint32_t magic)
 {
-	set_time_fn(&ticks);
-
 	Terminal::initialize((uint16_t*)0xB8000, 80, 25);
 	printf("BootInfo: 0x%8x, Magic: 0x%x\n", mbd, magic);
 

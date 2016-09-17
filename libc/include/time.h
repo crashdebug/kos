@@ -8,7 +8,7 @@ max ulong	= 18 446 744 073 709 551 615
 #ifndef _TIME_H
 #define _TIME_H 1
 
-#define TICKS_PER_MILLISECOND	(long long)10
+#define TICKS_PER_MILLISECOND	(long long)1
 #define TICKS_PER_SECOND		(long long)(1000 * TICKS_PER_MILLISECOND)
 #define TICKS_PER_MINUTE		(long long)(60 * TICKS_PER_SECOND)
 #define TICKS_PER_HOUR			(long long)(60 * TICKS_PER_MINUTE)

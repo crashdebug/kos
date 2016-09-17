@@ -39,7 +39,7 @@ int itos(long l, unsigned char radix, char* buffer, int len)
 /*****************************************************************************
 	Formats and outputs the specified number in the specified radix.
 *****************************************************************************/
-void formatNumber(long num, unsigned char radix, int width, char pad, void (*putchr)(char))
+void formatNumber(long long num, unsigned char radix, int width, char pad, void (*putchr)(char))
 {
 	char* offset;
 	if (width > FORMAT_BUFLEN)
@@ -119,6 +119,10 @@ int printf(const char* __restrict text, ...)
 				else if (*p == 'x')
 				{
 					formatNumber(va_arg(args, long), 16, width, '0', s_putchr);
+				}
+				else if (*p == 'l')
+				{
+					formatNumber(va_arg(args, long long), 10, width, '0', s_putchr);
 				}
 				// p = pointer
 				else if (*p == 'p')

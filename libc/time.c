@@ -6,20 +6,15 @@ unsigned char DaysPerMonth[]		= { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 unsigned char DaysPerMonthLeap[]	= { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 // Provided by kernel
-static time_t(*s_ticksf)(void) = 0;
+extern "C" time_t ticks();
 
 #ifdef __cplusplus
 extern "C" {
 #endif 
 
-void set_time_fn(time_t(*fn)(void))
-{
-	s_ticksf = fn;
-}
-
 time_t time(time_t* arg)
 {
-	time_t t(s_ticksf());
+	time_t t(ticks());
 	if (arg != 0)
 	{
 		*arg = t;

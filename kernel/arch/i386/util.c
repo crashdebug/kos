@@ -23,3 +23,9 @@ void io_wait(void)
     asm volatile ( "outb %%al, $0x80" : : "a"(0) );
     /* %%al instead of %0 makes no difference.  TODO: does the register need to be zeroed? */
 }
+
+/* GCC has a <cpuid.h> header you should use instead of this. */
+void cpuid(int code, uint32_t* eax, uint32_t* edx)
+{
+    asm volatile ( "cpuid" : "=a"(*eax), "=d"(*edx) : "0"(code) : "ebx", "ecx" );
+}
