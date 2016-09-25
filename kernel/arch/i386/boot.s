@@ -93,7 +93,8 @@ _start:
 	call _init
 
 	# Install drivers before calling kernel_main().
-	call install_timer
+	call install_rtc
+#	call install_threads
 
 	# Enable interrupts
 	sti

@@ -33,19 +33,16 @@ void disable_interrupts( )
 // If you don't send an EOI, system won't raise any more IRQs
 void irqfunc(uint32_t irq, void* ctx)
 {
-	// Is the interrupt handler installed?
-	if (s_irqs[irq].handler == 0) return;
-
-	// Find out if we have a custom handler to run for this IRQ...
 	s_irqs[irq].count++;
 
-	if (s_irqs[irq].handler)
+	// Find out if we have a custom handler to run for this IRQ...
+	if (s_irqs[irq].handler != 0)
 	{
 		// Call the function
 		s_irqs[irq].handler(ctx);
 	}
 
-	send_pic_eoi((unsigned char)irq);
+	send_pic_eoi(static_cast<unsigned char>(irq));
 }
 
 // Define low level IRQ handlers. These functions will call 

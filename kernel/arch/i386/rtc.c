@@ -1,5 +1,9 @@
 #include "rtc.h"
 #include <stdbool.h>
+#include <time.h>
+#include <kernel.h>
+#include "irq.h"
+#include "pic.h"
 #include "util.h"
 
 #define RTC_ADDRESS_PORT	0x70
@@ -97,4 +101,56 @@ void getDateTime(int* year, int* month, int* day, int* hours, int* minutes, int*
 	if (bcd && !convertFromBCD(temp, &temp))
 		bcd = false;
 	*year = temp + 2000U;
+}
+
+// Get the current time from BIOS/CMOS/RTC
+void set_time()
+{
+	struct tm t;
+	getDateTime(&t.tm_year, &t.tm_mon, &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec);
+	set_ticks(mktime(&t));
+}
+
+// Handles the timer.
+// Increments the 'ticks' variable every time the timer fires.
+void rtc_handler(void*)
+{
+	// Register C must be read, otherwise the interrupt will not trigger again.
+	// select register C
+	outb(0x70, 0x0C);
+	// just throw away contents
+	inb(0x71);
+
+	set_time();
+}
+
+void install_rtc()
+{
+	char prev;
+
+	// Install the tick handler on IRQ 8
+    install_irq_handler(8, rtc_handler);
+
+	// Make sure IRQ8 is not masked
+	pic_clear_mask(8);
+
+	// Select register B, and disable NMI
+	outb(0x70, 0x8B);
+	// Read the current value of register B
+	prev = inb(0x71);
+	// Set the index again (a read will reset the index to register D)
+	outb(0x70, 0x8B);
+	// Write the previous value ORed with 0x40. This turns on bit 6 of register B
+	outb(0x71, prev | 0x40);
+
+	// rate must be above 2 and not over 15
+	char rate = 0x06; // 0x06 = 1024Hz
+	// set index to register A, disable NMI
+	outb(0x70, 0x8A);
+	// get initial value of register A
+	prev = inb(0x71);
+	// reset index to A
+	outb(0x70, 0x8A);
+	// Write only our rate to A. Note, rate is the bottom 4 bits.
+	outb(0x71, (prev & 0xF0) | rate);
 }

@@ -7,10 +7,50 @@ void send_pic_eoi(unsigned char irq)
 {
 	if (irq >= 8)
 	{
-		outb(PIC2_COMMAND,PIC_EOI);
+		outb(PIC2_COMMAND, PIC_EOI);
 	}
-	outb(PIC1_COMMAND,PIC_EOI);
+	outb(PIC1_COMMAND, PIC_EOI);
 }
+
+unsigned char pic_irq_mask(uint16_t port)
+{
+	return inb(port);
+}
+
+void pic_set_irq_mask(unsigned char irq)
+{
+	uint16_t port;
+	uint8_t value;
+	if (irq < 8)
+	{
+		port = PIC1_DATA;
+	}
+	else
+	{
+		port = PIC2_DATA;
+		irq -= 8;
+	}
+	value = inb(port) | (1 << irq);
+	outb(port, value);
+}
+
+void pic_clear_mask(unsigned char irq)
+{
+	uint16_t port;
+	uint8_t value;
+	if (irq < 8)
+	{
+		port = PIC1_DATA;
+	}
+	else
+	{
+		port = PIC2_DATA;
+		irq -= 8;
+	}
+	value = inb(port) & ~(1 << irq);
+	outb(port, value);
+}
+
 
 // Normally, IRQs 0 to 7 are mapped to entries 8 to 15.
 // This is a problem in protected mode, because IDT entry 8 is a Double Fault!

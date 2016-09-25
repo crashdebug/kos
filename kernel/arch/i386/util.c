@@ -29,3 +29,19 @@ void cpuid(int code, uint32_t* eax, uint32_t* edx)
 {
     asm volatile ( "cpuid" : "=a"(*eax), "=d"(*edx) : "0"(code) : "ebx", "ecx" );
 }
+
+// Read a 64-bit value from a MSR.
+// The A constraint stands for concatenation of registers EAX and EDX.
+uint64_t rdmsr(uint32_t msr_id)
+{
+    uint64_t msr_value;
+    asm volatile ( "rdmsr" : "=A" (msr_value) : "c" (msr_id) );
+    return msr_value;
+}
+
+// Write a 64-bit value to a MSR.
+// The A constraint stands for concatenation of registers EAX and EDX.
+void wrmsr(uint32_t msr_id, uint64_t msr_value)
+{
+    asm volatile ( "wrmsr" : : "c" (msr_id), "A" (msr_value) );
+}
