@@ -25,7 +25,7 @@ LIBS?=
 CFLAGS:=$(CFLAGS) -ffreestanding -fbuiltin -Wall -Wextra -fno-exceptions -Iinclude -I../libc/include
 CPPFLAGS:=$(CPPFLAGS) -fno-rtti 
 LDFLAGS:=$(LDFLAGS)
-LIBS:=$(LIBS) -nostdlib -lgcc -lc -L$(BUILDDIR)
+LIBS:=$(LIBS) -nostdlib -static-libgcc -lgcc -lc -L$(BUILDDIR)
 
 ARCHDIR:=arch/$(HOSTARCH)
  

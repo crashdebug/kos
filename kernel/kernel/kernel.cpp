@@ -1,3 +1,4 @@
+#include <kernel.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <terminal.h>
@@ -24,12 +25,12 @@ unsigned long long _time = 0;
 extern "C" {
 #endif
 
-unsigned long long ticks()
+time_t ticks()
 {
 	return _time;
 }
 
-void set_ticks(unsigned long long t)
+void set_ticks(time_t t)
 {
 	_time = t;
 }

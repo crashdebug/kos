@@ -5,16 +5,12 @@ ticks/1000y	=      3 153 600 000 000 000
 max ulong	= 18 446 744 073 709 551 615
 */
 
-#ifndef _TIME_H
-#define _TIME_H 1
+#ifndef _KOS_TIME_H
+#define _KOS_TIME_H 1
 
-#define TICKS_PER_MILLISECOND	(long long)1
-#define TICKS_PER_SECOND		(long long)(1000 * TICKS_PER_MILLISECOND)
-#define TICKS_PER_MINUTE		(long long)(60 * TICKS_PER_SECOND)
-#define TICKS_PER_HOUR			(long long)(60 * TICKS_PER_MINUTE)
-#define TICKS_PER_DAY			(long long)(24 * TICKS_PER_HOUR)
-#define SECONDS_PER_YEAR		(long long)31536000
-#define SECONDS_PER_LEAP_YEAR	(long long)31622400
+#ifdef TEST
+namespace kos {
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,8 +35,20 @@ time_t time(time_t* arg);
 time_t mktime(struct tm* time);
 struct tm* gmtime(const time_t* time);
 
+#ifdef TEST
+}
+#endif
+
 #ifdef __cplusplus
 }
 #endif 
+
+#define TICKS_PER_MILLISECOND	time_t(1)
+#define TICKS_PER_SECOND		time_t(1000 * TICKS_PER_MILLISECOND)
+#define TICKS_PER_MINUTE		time_t(60 * TICKS_PER_SECOND)
+#define TICKS_PER_HOUR			time_t(60 * TICKS_PER_MINUTE)
+#define TICKS_PER_DAY			time_t(24 * TICKS_PER_HOUR)
+#define SECONDS_PER_YEAR		time_t(31536000ULL)
+#define SECONDS_PER_LEAP_YEAR	time_t(31622400ULL)
 
 #endif

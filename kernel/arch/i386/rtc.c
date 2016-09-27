@@ -103,12 +103,16 @@ void getDateTime(int* year, int* month, int* day, int* hours, int* minutes, int*
 	*year = temp + 2000U;
 }
 
+static float _ticks = 0;
+static time_t _time = 0;
+
 // Get the current time from BIOS/CMOS/RTC
 void set_time()
 {
 	struct tm t;
 	getDateTime(&t.tm_year, &t.tm_mon, &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec);
-	set_ticks(mktime(&t));
+	_time = mktime(&t);
+	set_ticks(_time);
 }
 
 // Handles the timer.
@@ -121,7 +125,12 @@ void rtc_handler(void*)
 	// just throw away contents
 	inb(0x71);
 
-	set_time();
+	if (_ticks >= 16)
+	{
+		set_time();
+		_ticks -= 16;
+	}
+	_ticks++;
 }
 
 void install_rtc()

@@ -5,16 +5,16 @@ char formatBuffer[FORMAT_BUFLEN];
 
 void(*s_putchr)(char) = 0;
 
-int itos(long l, unsigned char radix, char* buffer, int len)
+int itos(long long l, unsigned char radix, char* buffer, int len)
 {
 	char* offset = buffer;
 	// Insert the zero terminator at the end of the string
 	offset[0] = '\0';
-	unsigned long num = l;
+	long long num = l;
 	int chars = 0;
 	do
 	{
-		unsigned long temp = (unsigned long)num % radix;
+		char temp = (char)(num % radix);
 		// Move left one character (we're going from smallest to largest)
 		offset--;
 		// Is a regular digit good enough?
@@ -28,7 +28,7 @@ int itos(long l, unsigned char radix, char* buffer, int len)
 			*offset = temp - 10 + 'a';
 		}
 		// Reduce what has been done so far
-		num = (unsigned long)num / radix;
+		num /= radix;
 		chars++;
 	}
 	// Loop while some number is left
@@ -113,21 +113,21 @@ int printf(const char* __restrict text, ...)
 				// d = digits
 				else if (*p == 'i')
 				{
-					formatNumber(va_arg(args, long), 10, width, '0', s_putchr);
+					formatNumber(va_arg(args, int), 10, width, '0', s_putchr);
 				}
 				// x = hex
 				else if (*p == 'x')
 				{
-					formatNumber(va_arg(args, long), 16, width, '0', s_putchr);
+					formatNumber(va_arg(args, int), 16, width, '0', s_putchr);
 				}
 				else if (*p == 'l')
 				{
-					formatNumber(va_arg(args, long long), 10, width, '0', s_putchr);
+					formatNumber(va_arg(args, unsigned long long), 10, width, '0', s_putchr);
 				}
 				// p = pointer
 				else if (*p == 'p')
 				{
-					formatNumber(va_arg(args, long), 16, width, '0', s_putchr);
+					formatNumber(va_arg(args, int), 16, width, '0', s_putchr);
 				}
 				// s = string
 				else if (*p == 's')

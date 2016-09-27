@@ -5,6 +5,10 @@ unsigned int SecondsPerMonthLeap[]	= { 2678400, 2505600, 2678400, 2592000, 26784
 unsigned char DaysPerMonth[]		= { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 unsigned char DaysPerMonthLeap[]	= { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
+#ifdef TEST
+using namespace kos;
+#endif
+
 // Provided by kernel
 extern "C" time_t ticks();
 
@@ -14,7 +18,7 @@ extern "C" {
 
 time_t time(time_t* arg)
 {
-	time_t t(ticks());
+	time_t t = ticks();
 	if (arg != 0)
 	{
 		*arg = t;
@@ -33,7 +37,7 @@ time_t mktime(struct tm* time)
 	t += TICKS_PER_SECOND * time->tm_sec;
 	t += TICKS_PER_MINUTE * time->tm_min;
 	t += TICKS_PER_HOUR * time->tm_hour;
-	t += TICKS_PER_DAY * time->tm_mday;
+	t += TICKS_PER_DAY * (time->tm_mday - 1);
 
 	int month = time->tm_mon;
 	bool leap = is_leap_year(time->tm_year); 
@@ -73,15 +77,6 @@ int year(time_t* remain)
 	{
 		if (is_leap_year(year))
 		{
-			*remain -= SECONDS_PER_LEAP_YEAR * TICKS_PER_SECOND;
-		}
-		else
-		{
-			*remain -= SECONDS_PER_YEAR * TICKS_PER_SECOND;
-		}
-		year++;
-		if (is_leap_year(year))
-		{
 			if (*remain < SECONDS_PER_LEAP_YEAR * TICKS_PER_SECOND)
 			{
 				break;
@@ -94,14 +89,23 @@ int year(time_t* remain)
 				break;
 			}
 		}
+		if (is_leap_year(year))
+		{
+			*remain -= SECONDS_PER_LEAP_YEAR * TICKS_PER_SECOND;
+		}
+		else
+		{
+			*remain -= SECONDS_PER_YEAR * TICKS_PER_SECOND;
+		}
+		year++;
 	}
 	return year;
 }
 
 int month(time_t* remain, bool leap)
 {
-	unsigned char month = 0;
-	while (*remain > (long long)(leap ? SecondsPerMonthLeap[month] : SecondsPerMonth[month]) * TICKS_PER_SECOND)
+	unsigned char month = 1;
+	while (*remain >= (long long)(leap ? SecondsPerMonthLeap[month] : SecondsPerMonth[month]) * TICKS_PER_SECOND)
 	{
 		*remain -= (long long)(leap ? SecondsPerMonthLeap[month] : SecondsPerMonth[month]) * TICKS_PER_SECOND;
 		month++;
@@ -111,8 +115,8 @@ int month(time_t* remain, bool leap)
 
 int day(time_t* remain)
 {
-	unsigned char day = 0;
-	while (*remain > TICKS_PER_DAY)
+	unsigned char day = 1;
+	while (*remain >= TICKS_PER_DAY)
 	{
 		day++;
 		*remain -= TICKS_PER_DAY;
@@ -123,7 +127,7 @@ int day(time_t* remain)
 int hours(time_t* remain)
 {
 	unsigned char hours = 0;
-	while (*remain > TICKS_PER_HOUR)
+	while (*remain >= TICKS_PER_HOUR)
 	{
 		hours++;
 		*remain -= TICKS_PER_HOUR;
@@ -134,7 +138,7 @@ int hours(time_t* remain)
 int minutes(time_t* remain)
 {
 	unsigned char minutes = 0;
-	while (*remain > TICKS_PER_MINUTE)
+	while (*remain >= TICKS_PER_MINUTE)
 	{
 		minutes++;
 		*remain -= TICKS_PER_MINUTE;
@@ -145,7 +149,7 @@ int minutes(time_t* remain)
 int seconds(time_t* remain)
 {
 	unsigned char seconds = 0;
-	while (*remain > TICKS_PER_SECOND)
+	while (*remain >= TICKS_PER_SECOND)
 	{
 		seconds++;
 		*remain -= TICKS_PER_SECOND;
@@ -155,7 +159,7 @@ int seconds(time_t* remain)
 
 struct tm* gmtime(const time_t *time)
 {
-	tm* t = new tm;
+	struct tm* t = new tm;
 	if (*time > 0)
 	{
 		time_t temp = *time;
