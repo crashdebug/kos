@@ -107,12 +107,12 @@ static float _ticks = 0;
 static time_t _time = 0;
 
 // Get the current time from BIOS/CMOS/RTC
-void set_time()
+void get_rtc_time()
 {
 	struct tm t;
 	getDateTime(&t.tm_year, &t.tm_mon, &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec);
 	_time = mktime(&t);
-	set_ticks(_time);
+	set_ticks(_time + _ticks);
 }
 
 // Handles the timer.
@@ -125,16 +125,26 @@ void rtc_handler(void*)
 	// just throw away contents
 	inb(0x71);
 
-	if (_ticks >= 16)
+	if (_ticks >= 1000)
 	{
-		set_time();
-		_ticks -= 16;
+		_ticks -= 1000;
 	}
-	_ticks++;
+	if (static_cast<unsigned int>(_ticks) % 16 == 0)
+	{
+		get_rtc_time();
+	}
+	else
+	{
+		set_ticks(_time + _ticks);
+	}
+	_ticks += (1000.0f / 1024.0f);
 }
 
 void install_rtc()
 {
+	// Get the current UTC time from RTC
+	get_rtc_time();
+
 	char prev;
 
 	// Install the tick handler on IRQ 8

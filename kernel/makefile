@@ -66,6 +66,9 @@ $(ALL_OUR_OBJS) \
 $(CRTBEGIN_OBJ) \
 $(CRTEND_OBJ) \
 
+MODDI3:=$(BUILDDIR)/_moddi3.o
+DIVDI3:=$(BUILDDIR)/_divdi3.o
+
 DIRS=$(sort $(dir $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS))))
 
 all: $(BUILDDIR)/kos.bin
@@ -73,7 +76,7 @@ all: $(BUILDDIR)/kos.bin
 .PHONY: all clean run test
 
 $(BUILDDIR)/kos.bin: $(DIRS) $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS)) $(ARCHDIR)/linker.ld $(BUILDDIR)/libc.a
-	$(BINS)$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS)) $(CRTBEGIN_OBJ) $(CRTEND_OBJ) $(LDFLAGS) $(LIBS)
+	$(BINS)$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS)) $(CRTBEGIN_OBJ) $(CRTEND_OBJ) $(MODDI3) $(DIVDI3) $(LDFLAGS) $(LIBS)
 
 $(BUILDDIR)/kernel/%.o: %.cpp
 	$(BINS)$(CPP) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)

@@ -115,7 +115,7 @@ int month(time_t* remain, bool leap)
 
 int day(time_t* remain)
 {
-	unsigned char day = 1;
+	unsigned char day = 0;
 	while (*remain >= TICKS_PER_DAY)
 	{
 		day++;
@@ -164,7 +164,7 @@ struct tm* gmtime(const time_t *time)
 	{
 		time_t temp = *time;
 		t->tm_year = year(&temp);
-		t->tm_mon = month(&temp, is_leap_year(t->tm_year));
+		t->tm_mon = month(&temp, is_leap_year(t->tm_year)) - 1;
 		t->tm_mday = day(&temp);
 		t->tm_hour = hours(&temp);
 		t->tm_min = minutes(&temp);

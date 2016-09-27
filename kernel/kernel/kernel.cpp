@@ -19,7 +19,7 @@
 #endif
 
 vector<IDriver*> _drivers;
-unsigned long long _time = 0;
+time_t _time = 0;
 
 #ifdef __cplusplus
 extern "C" {
