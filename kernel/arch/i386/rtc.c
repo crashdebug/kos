@@ -103,7 +103,7 @@ void getDateTime(int* year, int* month, int* day, int* hours, int* minutes, int*
 	*year = temp + 2000U;
 }
 
-static float _ticks = 0;
+static unsigned int _ticks = 0;
 static time_t _time = 0;
 
 // Get the current time from BIOS/CMOS/RTC
@@ -129,7 +129,7 @@ void rtc_handler(void*)
 	{
 		_ticks -= 1000;
 	}
-	if (static_cast<unsigned int>(_ticks) % 16 == 0)
+	if (_ticks % 16 == 0)
 	{
 		get_rtc_time();
 	}
@@ -137,7 +137,7 @@ void rtc_handler(void*)
 	{
 		set_ticks(_time + _ticks);
 	}
-	_ticks += (1000.0f / 1024.0f);
+	_ticks++;
 }
 
 void install_rtc()
