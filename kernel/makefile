@@ -13,7 +13,7 @@ CPPFLAGS=-DTEST -D__lib -fpermissive
 LIBFLAGS=$(BUILDDIR)/libk.a BINS= CPPFLAGS="-D TEST -D__kos_libc -Iinclude"
 endif
 
-CC=g++
+CC=gcc
 CPP=g++
 AR=ar
 AS=as
@@ -25,7 +25,7 @@ LIBS?=
 CFLAGS:=$(CFLAGS) -ffreestanding -fbuiltin -Wall -Wextra -fno-exceptions -Iinclude -I../libc/include
 CPPFLAGS:=$(CPPFLAGS) -fno-rtti 
 LDFLAGS:=$(LDFLAGS)
-LIBS:=$(LIBS) -nostdlib -static-libgcc -lgcc -lc -L$(BUILDDIR)
+LIBS:=$(LIBS) -nostdlib -static-libgcc -lc -lgcc -L$(BUILDDIR)
 
 ARCHDIR:=arch/$(HOSTARCH)
  
@@ -66,9 +66,6 @@ $(ALL_OUR_OBJS) \
 $(CRTBEGIN_OBJ) \
 $(CRTEND_OBJ) \
 
-MODDI3:=$(BUILDDIR)/_moddi3.o
-DIVDI3:=$(BUILDDIR)/_divdi3.o
-
 DIRS=$(sort $(dir $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS))))
 
 all: $(BUILDDIR)/kos.bin
@@ -76,16 +73,16 @@ all: $(BUILDDIR)/kos.bin
 .PHONY: all clean run test
 
 $(BUILDDIR)/kos.bin: $(DIRS) $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS)) $(ARCHDIR)/linker.ld $(BUILDDIR)/libc.a
-	$(BINS)$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS)) $(CRTBEGIN_OBJ) $(CRTEND_OBJ) $(MODDI3) $(DIVDI3) $(LDFLAGS) $(LIBS)
+	$(BINS)$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS)) $(CRTBEGIN_OBJ) $(CRTEND_OBJ) $(LDFLAGS) $(LIBS)
 
 $(BUILDDIR)/kernel/%.o: %.cpp
 	$(BINS)$(CPP) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 $(BUILDDIR)/kernel/%.o: %.c
-	$(BINS)$(CC) -c $< -o $@ $(CFLAGS)
+	$(BINS)$(CPP) -c $< -o $@ $(CFLAGS)
 
 $(BUILDDIR)/kernel/%.o: %.s
-	$(BINS)$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	$(BINS)$(CPP) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 $(BUILDDIR)/libc.a:
 	cd ../libc ; \
