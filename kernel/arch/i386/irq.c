@@ -42,7 +42,7 @@ void irqfunc(uint32_t irq, void* ctx)
 		s_irqs[irq].handler(ctx);
 	}
 
-	send_pic_eoi(static_cast<unsigned char>(irq));
+	send_pic_eoi((unsigned char)irq);
 }
 
 // Define low level IRQ handlers. These functions will call 

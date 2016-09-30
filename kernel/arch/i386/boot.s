@@ -91,10 +91,11 @@ _start:
 
 	# Call the global constructors.
 	call _init
+	call __cxa_finalize
 
 	# Install drivers before calling kernel_main().
 	call install_rtc
-#	call install_threads
+	call install_threads
 
 	# Enable interrupts
 	sti

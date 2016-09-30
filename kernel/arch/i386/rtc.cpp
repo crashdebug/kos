@@ -140,6 +140,10 @@ void rtc_handler(void*)
 	_ticks++;
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void install_rtc()
 {
 	// Get the current UTC time from RTC
@@ -173,3 +177,7 @@ void install_rtc()
 	// Write only our rate to A. Note, rate is the bottom 4 bits.
 	outb(0x71, (prev & 0xF0) | rate);
 }
+
+#ifdef __cplusplus
+}
+#endif

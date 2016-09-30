@@ -45,6 +45,7 @@ kernel/memory.o \
 kernel/pagebitmap.o \
 kernel/pageblockmap.o \
 kernel/new.o \
+kernel/static.o \
 
 TEMPLATES:=\
 include/vector.h \
@@ -56,15 +57,8 @@ CRTN_OBJ:=$(ARCHDIR)/crtn.o
 
 ALL_OUR_OBJS:=\
 $(KERNEL_ARCH_OBJS) \
-$(CRTI_OBJ) \
 $(OBJS) \
 $(LIBOBJS) \
-$(CRTN_OBJ) \
-
-OBJ_LINK_LIST:=\
-$(ALL_OUR_OBJS) \
-$(CRTBEGIN_OBJ) \
-$(CRTEND_OBJ) \
 
 DIRS=$(sort $(dir $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS))))
 
@@ -72,8 +66,8 @@ all: $(BUILDDIR)/kos.bin
 
 .PHONY: all clean run test
 
-$(BUILDDIR)/kos.bin: $(DIRS) $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS)) $(ARCHDIR)/linker.ld $(BUILDDIR)/libc.a
-	$(BINS)$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS)) $(CRTBEGIN_OBJ) $(CRTEND_OBJ) $(LDFLAGS) $(LIBS)
+$(BUILDDIR)/kos.bin: $(DIRS) $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS) $(CRTI_OBJ) $(CRTN_OBJ)) $(ARCHDIR)/linker.ld $(BUILDDIR)/libc.a
+	$(BINS)$(CC) -T $(ARCHDIR)/linker.ld  $(LDFLAGS) -o $@ $(CFLAGS) $(addprefix $(BUILDDIR)/kernel/, $(CRTI_OBJ)) $(CRTBEGIN_OBJ) $(addprefix $(BUILDDIR)/kernel/, $(ALL_OUR_OBJS)) $(CRTEND_OBJ) $(addprefix $(BUILDDIR)/kernel/, $(CRTN_OBJ)) $(LIBS)
 
 $(BUILDDIR)/kernel/%.o: %.cpp
 	$(BINS)$(CPP) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
@@ -82,7 +76,7 @@ $(BUILDDIR)/kernel/%.o: %.c
 	$(BINS)$(CPP) -c $< -o $@ $(CFLAGS)
 
 $(BUILDDIR)/kernel/%.o: %.s
-	$(BINS)$(CPP) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	$(BINS)$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 $(BUILDDIR)/libc.a:
 	cd ../libc ; \
