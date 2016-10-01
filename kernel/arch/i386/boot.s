@@ -96,6 +96,7 @@ _start:
 	# Install drivers before calling kernel_main().
 	call install_rtc
 	call install_threads
+	call install_keyboard
 
 	# Enable interrupts
 	sti

@@ -18,8 +18,11 @@
 #error "This needs to be compiled with a ix86-elf compiler" 
 #endif
 
-vector<IDriver*> _drivers;
-time_t _time = 0;
+static vector<IDriver*> s_drivers;
+static time_t s_time = 0;
+
+static keycode_t s_keyBuffer[32];
+static uint8_t s_keyBufferPos = 0;
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,17 +30,31 @@ extern "C" {
 
 time_t ticks()
 {
-	return _time;
+	return s_time;
 }
 
 void set_ticks(time_t t)
 {
-	_time = t;
+	s_time = t;
+}
+
+void key_pressed(keycode_t key)
+{
+	if (s_keyBufferPos < sizeof(s_keyBuffer))
+	{
+		s_keyBuffer[s_keyBufferPos++] = key;
+	}
+}
+
+keycode_t read_key()
+{
+	while (s_keyBufferPos == 0);
+	return s_keyBuffer[s_keyBufferPos--];
 }
 
 void install_driver(IDriver* driver)
 {
-	_drivers.push_back(driver);
+	s_drivers.push_back(driver);
 }
 
 void kernel_early(multiboot_info_t* mbd, uint32_t magic)
@@ -51,9 +68,9 @@ void kernel_early(multiboot_info_t* mbd, uint32_t magic)
 
 void kernel_main()
 {
-	for (unsigned int i = 0; i < _drivers.size(); i++)
+	for (unsigned int i = 0; i < s_drivers.size(); i++)
 	{
-		_drivers.at(i)->install();
+		s_drivers.at(i)->install();
 	}
 
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLUE);
@@ -75,15 +92,6 @@ void kernel_main()
 		delete time;
 		l++;
 	}
-}
-
-void __cxa_finalize(void *)
-{
-}
-
-int __cxa_atexit(void (*)(void *), void *, void *)
-{
-	return 0;
 }
 
 // Called when a virtual method has not been overriddent.
