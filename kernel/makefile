@@ -4,7 +4,7 @@ HOSTARCH:=$(shell ../scripts/target-triplet-to-arch.sh $(HOST))
 ifneq ($(MAKECMDGOALS),test)
 BINS=../tools/bin/$(HOST)-
 BUILDDIR?=../build
-CPPFLAGS?=
+CPPFLAGS?=-fno-rtti
 LIBFLAGS=
 else
 BINS=
@@ -23,7 +23,7 @@ LDFLAGS?=
 LIBS?=
 
 CFLAGS:=$(CFLAGS) -ffreestanding -fbuiltin -Wall -Wextra -fno-exceptions -Iinclude -I../libc/include
-CPPFLAGS:=$(CPPFLAGS) -fno-rtti 
+CPPFLAGS:=$(CPPFLAGS) -std=c++11
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -static-libgcc -lc -lgcc -L$(BUILDDIR)
 
@@ -46,6 +46,7 @@ kernel/pagebitmap.o \
 kernel/pageblockmap.o \
 kernel/new.o \
 kernel/static.o \
+kernel/command.o \
 
 TEMPLATES:=\
 include/vector.h \
@@ -76,7 +77,7 @@ $(BUILDDIR)/kernel/%.o: %.c
 	$(BINS)$(CPP) -c $< -o $@ $(CFLAGS)
 
 $(BUILDDIR)/kernel/%.o: %.s
-	$(BINS)$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	$(BINS)$(CC) -c $< -o $@ $(CFLAGS)
 
 $(BUILDDIR)/libc.a:
 	cd ../libc ; \

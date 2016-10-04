@@ -1,6 +1,9 @@
 #include <stddef.h>
 
 #ifdef __cplusplus
+#ifdef TEST
+namespace kos {
+#endif
 extern "C" {
 #endif
 
@@ -21,6 +24,31 @@ void* memcpy(void* __restrict dstptr, const void* __restrict srcptr, size_t size
 	return dstptr;
 }
 
+int strcmp(const char* lhs, const char* rhs)
+{
+	int pos = 0;
+	while (true)
+	{
+		if (lhs[pos] < rhs[pos])
+		{
+			return -1;
+		}
+		else if (lhs[pos] > rhs[pos])
+		{
+			return 1;
+		}
+		else if (lhs[pos] == 0 && rhs[pos] == 0)
+		{
+			return 0;
+		}
+		pos++;
+	}
+}
+
 #ifdef __cplusplus
 }
+#ifdef TEST
+}
 #endif
+#endif
+

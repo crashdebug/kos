@@ -2,6 +2,10 @@
 #include <string.h>
 #include <new.h>
 
+#if defined(__cplusplus) && defined(TEST)
+using namespace kos;
+#endif
+
 struct PageBlock
 {
 	unsigned char* pAddress;
