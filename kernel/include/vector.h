@@ -2,7 +2,15 @@
 #ifndef _VECTOR_H
 #define _VECTOR_H 1
 
+#ifdef TEST
+#include "../../libc/include/string.h"
+#else
 #include <string.h>
+#endif
+
+#if defined(__cplusplus) && defined(TEST)
+using namespace kos;
+#endif
 
 template <typename T>
 class vector
@@ -23,11 +31,11 @@ public:
 		this->ensure_capacity(this->size() + 1);
 		this->_items[this->_pos++] = value;
 	}
-	T at(unsigned int pos)
+	T at(unsigned int pos) const
 	{
 		return this->_items[pos];
 	}
-	unsigned int size()
+	unsigned int size() const
 	{
 		return this->_pos;
 	}

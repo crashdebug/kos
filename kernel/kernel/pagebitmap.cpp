@@ -1,6 +1,10 @@
 #include <pagemap.h>
 #include <string.h>
 
+#if defined(__cplusplus) && defined(TEST)
+using namespace kos;
+#endif
+
 PageBitmap::PageBitmap(void* pAddress, __SIZE_TYPE__ iSize, __SIZE_TYPE__ iPageSize)
 {
 	this->iTotalPages = iSize / iPageSize;

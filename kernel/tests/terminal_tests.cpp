@@ -2,7 +2,6 @@
 //#include "../src/terminal.cpp"
 //#include <cstdio>
 #include <terminal.h>
-#include "../../libc/include/stdio.h"
 
 TEST(TerminalTests, TerminalOutputTest)
 {

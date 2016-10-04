@@ -28,7 +28,6 @@ void __cxa_finalize(void *f)
 	uarch_t i = __atexit_func_count;
 	if (!f)
 	{
-		printf("f 0x%8x - i %i", f, i);
 		/*
 		* According to the Itanium C++ ABI, if __cxa_finalize is called without a
 		* function ptr, then it means that we should destroy EVERYTHING

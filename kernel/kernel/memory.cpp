@@ -8,6 +8,10 @@
 // Total number of pages available
 //unsigned int iTotalPages;
 
+#if defined(__cplusplus) && defined(TEST)
+using namespace kos;
+#endif
+
 IPageMap** g_pageMaps = 0;
 unsigned long long g_memsize = 0;
 

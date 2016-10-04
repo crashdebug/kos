@@ -10,8 +10,6 @@
 // Timer frequency in Hz
 #define frequency 10000
 
-static unsigned long long _t = 0;
-
 // Handles the timer.
 // Increments the 'ticks' variable every time the timer fires.
 void thread_handler(void*)
