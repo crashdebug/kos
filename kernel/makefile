@@ -4,7 +4,7 @@ HOSTARCH:=$(shell ../scripts/target-triplet-to-arch.sh $(HOST))
 ifneq ($(MAKECMDGOALS),test)
 BINS=../tools/bin/$(HOST)-
 BUILDDIR?=../build
-CPPFLAGS?=-fno-rtti
+CPPFLAGS?=-fno-rtti -D_KOS
 LIBFLAGS=
 else
 BINS=
@@ -40,7 +40,7 @@ OBJS:=\
 kernel/kernel.o \
 
 LIBOBJS:=\
-kernel/terminal.o \
+kernel/iterminal.o \
 kernel/memory.o \
 kernel/pagebitmap.o \
 kernel/pageblockmap.o \

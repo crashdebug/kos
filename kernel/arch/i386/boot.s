@@ -81,6 +81,9 @@ _start:
 	# Setup interrupt service routines
 	call install_isr
 
+	# Setup terminal to be able to output on screen
+	call install_terminal
+
 	# Push magic number and the location of the multiboot info table
 	# on to the stack. These will be passed to kernel_early() as arguments. 
 	push $0xc0ffee

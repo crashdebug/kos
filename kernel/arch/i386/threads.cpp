@@ -29,7 +29,7 @@ void thread_handler(void*)
 extern "C" void install_threads()
 {
 	// Install the tick handler
-//	install_irq_handler(0, thread_handler);
+	install_irq_handler(0, thread_handler);
 
 	// TODO: Check for APIC
 	uint32_t eax, edx;
@@ -38,7 +38,7 @@ extern "C" void install_threads()
 	{
 		printf("APIC available. ");
 	}
-/*
+
 	// Install PIT
 	unsigned int divisor = (unsigned int)((TIMER_E) / frequency);
 	printf("Tick freq = %i\n", divisor);
@@ -50,5 +50,5 @@ extern "C" void install_threads()
 		outb(0x40, (unsigned char)((divisor >> 8) & 0xff));
 		io_wait();
 		// TODO Check values are really set?
-	}*/
+	}
 }

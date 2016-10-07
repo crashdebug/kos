@@ -16,7 +16,7 @@ CPPFLAGS?=-DTEST
 else
 BUILDDIR?=../build
 BINS?=../tools/bin/$(HOST)-
-CPPFLAGS?=
+CPPFLAGS?=-D_KOS
 endif
 
 CFLAGS:=$(CFLAGS) -Wall -Wextra -Iinclude

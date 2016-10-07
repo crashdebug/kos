@@ -1,7 +1,7 @@
 #include <kernel.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <terminal.h>
+#include <iterminal.h>
 #include <multiboot.h>
 #include <time.h>
 #include <memory.h>
@@ -59,11 +59,10 @@ void install_driver(IDriver* driver)
 
 void kernel_early(multiboot_info_t* mbd, uint32_t magic)
 {
-	Terminal::initialize((uint16_t*)0xB8000, 80, 25);
-	printf("BootInfo: 0x%8x, Magic: 0x%x\n", mbd, magic);
+	Terminal::write("BootInfo: 0x%8x, Magic: 0x%x\n", mbd, magic);
 
 	MemoryManager::Initialize(mbd);
-	printf("MemoryManager initialized (%i kb available)\n", MemoryManager::Available() / 1024);
+	Terminal::write("MemoryManager initialized (%i kb available)\n", MemoryManager::Available() / 1024);
 }
 
 void kernel_main()
@@ -74,13 +73,13 @@ void kernel_main()
 	}
 
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLUE);
-	printf("[");
+	Terminal::write("[");
 	Terminal::setColor(Terminal::Color::COLOR_WHITE, Terminal::Color::COLOR_BLUE);
-	printf("kOS ");
+	Terminal::write("kOS ");
 	Terminal::setColor(Terminal::Color::COLOR_CYAN, Terminal::Color::COLOR_BLUE);
-	printf("v0.0.0");
+	Terminal::write("v0.0.0");
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLUE);
-	printf("]\n");
+	Terminal::write("]\n");
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLACK);
 
 	unsigned long long l = 0;

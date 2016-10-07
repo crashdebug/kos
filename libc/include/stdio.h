@@ -1,6 +1,26 @@
 #ifndef _KOS_STDIO
 #define _KOS_STDIO 1
 
+#ifdef TEST
+namespace kos {
+#endif
+
+#ifndef putc
+#ifdef _KOS
+struct __sFile
+{
+	int unused;
+};
+
+typedef struct __sFile FILE;
+
+extern void put_char(char c);
+#define putc(c) (put_char(c))
+#else
+#define putc(c) (s_putchr(c))
+#endif
+#endif
+
 /*****************************************************************************
 	Minimal subfunction for printf. Outputs each character and formats
 	any additional arguments.
@@ -34,10 +54,6 @@
 		l	long (32-bit) int						no
 		L	long long (64-bit) int					no
 *****************************************************************************/
-
-#ifdef TEST
-namespace kos {
-#endif
 
 int printf(const char* __restrict text, ...);
 void init_printf(void(*putchr)(char));
