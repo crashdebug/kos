@@ -33,7 +33,6 @@ namespace kos
 		static void write(const char* text, ...);
 		static void putChar(const char c);
 		static void moveCursor(size_t x, size_t y);
-		static const char* readLine();
 	};
 
 	class ITerminal

@@ -22,6 +22,8 @@ typedef struct KeyCode keycode_t;
 
 void install_driver(kos::IDriver* driver);
 
+keycode_t read_key();
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,7 +32,6 @@ void set_ticks(time_t ticks);
 time_t ticks();
 
 void key_pressed(struct KeyCode key);
-keycode_t read_key();
 
 #ifdef __cplusplus
 }

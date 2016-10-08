@@ -100,7 +100,7 @@ namespace kos
 
 	bool CommandParser::Command::Execute()
 	{
-		printf("Unknown command '%s'", this->_cmd);
+		printf("Unknown command '%s'\n", this->_cmd);
 		return false;
 	}
 

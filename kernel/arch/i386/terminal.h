@@ -7,10 +7,10 @@ namespace kos::x86
 {
 	class Terminalx86 : public ITerminal
 	{
-		size_t _width = 80;
-		size_t _height = 25;
-		size_t _row;
-		size_t _column;
+		short _width = 80;
+		short _height = 25;
+		short _row;
+		short _column;
 		uint8_t _color;
 		uint16_t* _buffer = (uint16_t*)0xB8000;
 

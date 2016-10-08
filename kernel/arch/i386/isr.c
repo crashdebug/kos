@@ -35,7 +35,7 @@ const char * exceptionMessages[] =
 // If the called function returns a non-NULL pointer, that pointer will be used as a stack to switch the task.
 void intfunc(uint32_t intnum, void *ctx)
 {
-	printf("Exception 0x%2lx: %s! System halted.", intnum, exceptionMessages[intnum]);
+	printf("Exception 0x%2x: %s! System halted.", intnum, exceptionMessages[intnum]);
 	while(1 == 1);
 }
 
@@ -44,7 +44,7 @@ void intfunc(uint32_t intnum, void *ctx)
 // If the called function returns a non-NULL pointer, that pointer will be used as a stack to switch the task.
 void intfunc_err(uint32_t intnum, void *ctx, uint32_t errcode)
 {
-	printf("Exception 0x%2lx: %s; %li! System halted.", intnum, exceptionMessages[intnum], errcode);
+	printf("Exception 0x%2x: %s; %i! System halted.", intnum, exceptionMessages[intnum], errcode);
 	while(1 == 1);
 }
 

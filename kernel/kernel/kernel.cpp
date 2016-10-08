@@ -25,11 +25,25 @@ static vector<IDriver*> s_drivers;
 static time_t s_time = 0;
 
 static keycode_t s_keyBuffer[32];
-static uint8_t s_keyBufferPos = 0;
+volatile uint8_t s_keyBufferPos = 0;
 
 void install_driver(IDriver* driver)
 {
 	s_drivers.push_back(driver);
+}
+
+keycode_t read_key()
+{
+	while (s_keyBufferPos == 0)
+	{
+	}
+	keycode_t key = s_keyBuffer[0];
+	if (s_keyBufferPos > 1)
+	{
+		memcpy(s_keyBuffer, s_keyBuffer + 1, sizeof(keycode_t) * (s_keyBufferPos - 1));
+	}
+	s_keyBufferPos--;
+	return key;
 }
 
 #ifdef __cplusplus
@@ -52,12 +66,6 @@ void key_pressed(keycode_t key)
 	{
 		s_keyBuffer[s_keyBufferPos++] = key;
 	}
-}
-
-keycode_t read_key()
-{
-	while (s_keyBufferPos == 0);
-	return s_keyBuffer[s_keyBufferPos--];
 }
 
 void kernel_early(multiboot_info_t* mbd, uint32_t magic)
@@ -85,18 +93,44 @@ void kernel_main()
 	Terminal::write("]\n");
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLACK);
 
+	vector<char>* cmdbuffer = new vector<char>(255);
+	cmdbuffer->push_back(0);
+	
 	while (true)
 	{
 		time_t t = time(0);
 		struct tm* time = gmtime(&t);
-		Terminal::write("\rDate: %2i.%2i.%4i %2i:%2i:%2i.%3i", time->tm_mday, time->tm_mon, time->tm_year, time->tm_hour, time->tm_min, time->tm_sec, (unsigned int)(t % 1000));
+		Terminal::write("\r[%4i-%2i-%2i %2i:%2i:%2i.%3i]> %s", time->tm_year, time->tm_mon, time->tm_mday, time->tm_hour, time->tm_min, time->tm_sec, (unsigned int)(t % 1000), cmdbuffer->begin());
 		delete time;
 
-		const char* line = Terminal::readLine();
-		ICommand* cmd = CommandParser::Parse(line);
-		if (cmd != 0)
+		keycode_t key = read_key();
+		switch (key.Key)
 		{
-			cmd->Execute();
+			case '\n':
+				Terminal::write("\n");
+				if (cmdbuffer->size() > 1)
+				{
+					ICommand* cmd = CommandParser::Parse(cmdbuffer->begin());
+					if (cmd != 0)
+					{
+						cmd->Execute();
+						delete cmd;
+					}
+					cmdbuffer->clear();
+					cmdbuffer->push_back(0);
+				}
+				break;
+			case '\b':
+				Terminal::write("\b");
+				cmdbuffer->pop_back();
+				cmdbuffer->pop_back();
+				cmdbuffer->push_back(0);
+				break;
+			default:
+				cmdbuffer->pop_back();
+				cmdbuffer->push_back(key.Key);
+				cmdbuffer->push_back(0);
+				break;
 		}
 	}
 }

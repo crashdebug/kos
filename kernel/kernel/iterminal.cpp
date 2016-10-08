@@ -43,9 +43,4 @@ namespace kos
 
 		va_end(args);
 	}
-
-	const char* Terminal::readLine()
-	{
-		return 0;
-	}
 }

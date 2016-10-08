@@ -23,9 +23,9 @@ namespace kos::x86
 		this->_column = 0;
 		this->_row = 0;
 		this->_color = make_color(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLACK);
-		for (size_t y = 0; y < this->_height; y++) {
-			for (size_t x = 0; x < this->_width; x++) {
-				const size_t index = y * this->_width + x;
+		for (short y = 0; y < this->_height; y++) {
+			for (short x = 0; x < this->_width; x++) {
+				const short index = y * this->_width + x;
 				this->_buffer[index] = make_vgaentry(' ', this->_color);
 			}
 		}
@@ -44,22 +44,41 @@ namespace kos::x86
 
 	void Terminalx86::putChar(const char c)
 	{
-		if (c == '\n')
+		switch (c)
 		{
+		// New line
+		case '\n':
 			this->_row++;
 			this->_column = -1;
-		}
-		else if (c == '\r')
-		{
+			break;
+		// Carriage return
+		case '\r':
 			this->_column = -1;
-		}
-		else if (c == '\t')
-		{
-			this->_column += 4; 
-		}
-		else
-		{
+			break;
+		// Tab
+		case '\t':
+			this->_column += 4;
+			break; 
+		// Backspace
+		case '\b':
+			if (this->_column > 0)
+			{
+				this->_column--;
+			}
+			else if (this->_row > 0)
+			{
+				this->_row--;
+			}
+			else
+			{
+				return;
+			}
+			this->putEntryAt(' ', this->_color, this->_column, this->_row);
+			this->_column--;
+			break;
+		default:
 			this->putEntryAt(c, this->_color, this->_column, this->_row);
+			break;
 		}
 		if (++this->_column >= this->_width) {
 			this->_column = 0;
@@ -74,7 +93,7 @@ namespace kos::x86
 	void Terminalx86::scroll()
 	{
 		memcpy(this->_buffer, this->_buffer + this->_width * 2, this->_width * (this->_height - 1) * 2);
-		for (size_t x = 0; x < this->_width; x++)
+		for (short x = 0; x < this->_width; x++)
 		{
 			const size_t index = (this->_height - 1) * this->_width + x;
 			this->_buffer[index] = make_vgaentry(' ', this->_color);

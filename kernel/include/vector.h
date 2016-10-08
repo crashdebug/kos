@@ -17,6 +17,11 @@ namespace kos
 		vector()
 		{
 		}
+		vector(size_t capacity)
+		{
+			this->_items = new T[capacity];
+			this->_capacity = capacity;
+		}
 		~vector()
 		{
 			if (this->_items != 0)
@@ -29,6 +34,21 @@ namespace kos
 			this->ensure_capacity(this->size() + 1);
 			this->_items[this->_pos++] = value;
 		}
+		void pop_back()
+		{
+			if (this->_pos > 0)
+			{
+				this->_pos--;
+			}
+		}
+		const T* begin() const
+		{
+			return this->_items;
+		}
+		const T* end() const
+		{
+			return this->_items + this->_pos;
+		}
 		T at(unsigned int pos) const
 		{
 			return this->_items[pos];
@@ -36,6 +56,10 @@ namespace kos
 		unsigned int size() const
 		{
 			return this->_pos;
+		}
+		void clear()
+		{
+			this->_pos = 0;
 		}
 	private:
 		T* _items = 0;
