@@ -128,6 +128,36 @@ _start:
 	hlt
 	jmp .Lhang
 
+.global _DMAComplete			# Allows the C code to link to this
+.type _DMAComplete, @function
+.set x_DMAPort,	8
+_DMAComplete:
+	push	%ebp
+	mov	%esp, %ebp
+
+	mov	$0x0c, %dx
+	mov	$0xff, %al
+	out	%al, %dx
+
+	mov	-x_DMAPort(%ebp), %edx
+	in	%dx, %al
+	mov	%al, %bl
+	in	%dx, %al
+	mov	%al, %bh
+	in	%dx, %al
+	mov	%al, %ah
+	in	%dx, %al
+	xchg	%al, %ah
+	sub	%ax, %bx
+	cmp	$0x40, %bx
+	jg	_DMAComplete
+	cmp	$0xffc0, %bx
+	jl	_DMAComplete
+
+	mov %ebp, %esp
+	pop %ebp
+	ret
+
 # This will set up our new segment registers. We need to do
 # something special in order to set CS. We do what is called a
 # far jump. A jump that includes a segment as well as an offset.
