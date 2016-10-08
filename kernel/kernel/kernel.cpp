@@ -77,7 +77,7 @@ void kernel_main()
 	Terminal::setColor(Terminal::Color::COLOR_WHITE, Terminal::Color::COLOR_BLUE);
 	Terminal::write("kOS ");
 	Terminal::setColor(Terminal::Color::COLOR_CYAN, Terminal::Color::COLOR_BLUE);
-	Terminal::write("v0.0.0");
+	Terminal::write("v%s", KOS_VERSION_STR);
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLUE);
 	Terminal::write("]\n");
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLACK);
@@ -87,7 +87,7 @@ void kernel_main()
 	{
 		time_t t = time(0);
 		struct tm* time = gmtime(&t);
-		printf("\rDate: %2i.%2i.%4i %2i:%2i:%2i [%i]", time->tm_mday, time->tm_mon, time->tm_year, time->tm_hour, time->tm_min, time->tm_sec, l);
+		Terminal::write("\rDate: %2i.%2i.%4i %2i:%2i:%2i.%3i [%i]", time->tm_mday, time->tm_mon, time->tm_year, time->tm_hour, time->tm_min, time->tm_sec, (unsigned int)(t % 1000), l);
 		delete time;
 		l++;
 	}

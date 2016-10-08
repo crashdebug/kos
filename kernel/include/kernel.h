@@ -6,6 +6,9 @@
 #include <time.h>
 #include <stdint.h>
 
+#define KOS_VERSION		0,0,1
+#define KOS_VERSION_STR	"0.0.1"
+
 struct KeyCode
 {
 	bool Shift;
