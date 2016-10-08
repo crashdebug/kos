@@ -3,11 +3,10 @@
 
 namespace CommandTests
 {
-
 	TEST(CommandTests, CommandParsingTest)
 	{
 		const char* s = "test 1234 \"foo bar\"";
-		ICommand* cmd = CommandParser::Parse(s);
+		kos::ICommand* cmd = kos::CommandParser::Parse(s);
 		ASSERT_NE(0, cmd);
 		ASSERT_STREQ("test", cmd->cmd());
 		ASSERT_EQ(2, cmd->argc());
@@ -16,10 +15,10 @@ namespace CommandTests
 		delete cmd;
 	}
 
-	class TestCommand : public ICommand
+	class TestCommand : public kos::ICommand
 	{
 	public:
-		TestCommand(const vector<const char*>* args)
+		TestCommand(const kos::vector<const char*>* args)
 		{
 			for (int i = 0; i < args->size(); i++)
 			{
@@ -32,15 +31,15 @@ namespace CommandTests
 		}
 	};
 
-	static ICommand* _execute_command(const vector<const char*>* args)
+	static kos::ICommand* _execute_command(const kos::vector<const char*>* args)
 	{
 		return new TestCommand(args);
 	}
 
 	TEST(CommandTests, CommandRegistrationTest)
 	{
-		CommandParser::Register("test", &_execute_command);
-		ICommand* cmd = CommandParser::Parse("test 1234 \"foo bar\"\n");
+		kos::CommandParser::Register("test", &_execute_command);
+		kos::ICommand* cmd = kos::CommandParser::Parse("test 1234 \"foo bar\"\n");
 		ASSERT_NE(0, cmd);
 		ASSERT_TRUE(cmd->Execute());
 	}

@@ -14,13 +14,6 @@
 // Increments the 'ticks' variable every time the timer fires.
 void thread_handler(void*)
 {
-	/*if ((++_t % 10) == 0)
-	{
-		time_t t = ticks();
-		t += 1;
-		set_ticks(t);
-	}*/
-
 	// TODO: Thread switching
 }
 

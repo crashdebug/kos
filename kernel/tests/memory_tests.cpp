@@ -8,7 +8,7 @@ TEST(MemoryTests, PageBitmapTest)
 	size_t len = 4096;
 	size_t pagelen = 256;
 	unsigned char* buffer = new unsigned char[len];
-	PageBitmap pb(buffer, len, pagelen);
+	kos::PageBitmap pb(buffer, len, pagelen);
 
 	int* ptr = 0;
 	ASSERT_TRUE(pb.Allocate(4, (void**)&ptr));
@@ -22,7 +22,7 @@ TEST(MemoryTests, PageBlockmapTest)
 	size_t len = 4096;
 	size_t pagelen = 1024;
 	unsigned char* buffer = new unsigned char[len];
-	PageBlockmap pb(buffer, len, pagelen);
+	kos::PageBlockmap pb(buffer, len, pagelen);
 
 	int* ptr = 0;
 	ASSERT_TRUE(pb.Allocate(512, (void**)&ptr));

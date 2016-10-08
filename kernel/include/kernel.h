@@ -20,13 +20,14 @@ struct KeyCode
 
 typedef struct KeyCode keycode_t;
 
+void install_driver(kos::IDriver* driver);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void set_ticks(time_t ticks);
 time_t ticks();
-void install_driver(IDriver* driver);
 
 void key_pressed(struct KeyCode key);
 keycode_t read_key();

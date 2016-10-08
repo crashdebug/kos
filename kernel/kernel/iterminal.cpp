@@ -3,13 +3,7 @@
 
 extern int print_args(const char*, va_list* args);
 
-static ITerminal* s_terminal = 0;
-
-/* Called from architecture specific methods */ 
-void set_terminal(ITerminal* terminal)
-{
-	s_terminal = terminal;
-}
+static kos::ITerminal* s_terminal = 0;
 
 /* Called from stdio.h (putc) */
 void put_char(char c)
@@ -17,27 +11,41 @@ void put_char(char c)
 	s_terminal->putChar(c);
 }
 
-void Terminal::putChar(const char c)
+namespace kos
 {
-	s_terminal->putChar(c);
-}
+	/* Called from architecture specific methods */ 
+	void set_terminal(kos::ITerminal* terminal)
+	{
+		s_terminal = terminal;
+	}
 
-void Terminal::moveCursor(size_t x, size_t y)
-{
-	s_terminal->moveCursor(x, y);
-}
+	void Terminal::putChar(const char c)
+	{
+		s_terminal->putChar(c);
+	}
 
-void Terminal::setColor(const Color fg, const Color bg)
-{
-	s_terminal->setColor(fg, bg);
-}
+	void Terminal::moveCursor(size_t x, size_t y)
+	{
+		s_terminal->moveCursor(x, y);
+	}
 
-void Terminal::write(const char* text, ...)
-{
-	va_list args;
-	va_start(args, text);
+	void Terminal::setColor(const Color fg, const Color bg)
+	{
+		s_terminal->setColor(fg, bg);
+	}
 
-	print_args(text, &args);
+	void Terminal::write(const char* text, ...)
+	{
+		va_list args;
+		va_start(args, text);
 
-	va_end(args);
+		print_args(text, &args);
+
+		va_end(args);
+	}
+
+	const char* Terminal::readLine()
+	{
+		return 0;
+	}
 }

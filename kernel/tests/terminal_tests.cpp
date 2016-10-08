@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 //#include "../src/terminal.cpp"
 //#include <cstdio>
-#include <terminal.h>
+#include <iterminal.h>
 
 TEST(TerminalTests, TerminalOutputTest)
 {
@@ -9,7 +9,7 @@ TEST(TerminalTests, TerminalOutputTest)
 	size_t height = 10;
 	uint16_t* buffer = new uint16_t[width * height];
 
-	Terminal::initialize(buffer, width, height);
+//	kos::Terminal::initialize(buffer, width, height);
 //	kos::printf("%i", 1);
 //	kos::printf("%i", 2);
 //	kos::printf("%i", 3);

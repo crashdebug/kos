@@ -3,7 +3,7 @@
 
 TEST(VectorTests, VectorPushBackTest)
 {
-	vector<int> v;
+	kos::vector<int> v;
 	for (int i = 1; i < 16; i++)
 	{
 		v.push_back(i);

@@ -1,6 +1,8 @@
 #include <new.h>
 #include <memory.h>
 
+using namespace kos;
+
 void* operator new (__SIZE_TYPE__, unsigned char*& address)
 {
 	return address;

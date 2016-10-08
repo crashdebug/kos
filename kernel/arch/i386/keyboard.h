@@ -8,14 +8,20 @@
 
 extern "C" void install_keyboard();
 
-class Keyboard : public IDriver
+namespace kos
 {
-public:
-	Keyboard(unsigned char id);
-	~Keyboard();
-	void updateLeds(unsigned char status);
-	void install();
-};
+	namespace x86
+	{
+		class Keyboard : public IDriver
+		{
+		public:
+			Keyboard(unsigned char id);
+			~Keyboard();
+			void updateLeds(unsigned char status);
+			void install();
+		};
+	}
+}
 
 #define LED_SCROLL_LOCK	1
 #define LED_NUM_LOCK	2

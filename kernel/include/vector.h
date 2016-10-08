@@ -8,62 +8,61 @@
 #include <string.h>
 #endif
 
-#if defined(__cplusplus) && defined(TEST)
-using namespace kos;
-#endif
-
-template <typename T>
-class vector
+namespace kos
 {
-public:
-	vector()
+	template <typename T>
+	class vector
 	{
-	}
-	~vector()
-	{
-		if (this->_items != 0)
+	public:
+		vector()
 		{
-			delete this->_items;
 		}
-	}
-	void push_back(const T& value)
-	{
-		this->ensure_capacity(this->size() + 1);
-		this->_items[this->_pos++] = value;
-	}
-	T at(unsigned int pos) const
-	{
-		return this->_items[pos];
-	}
-	unsigned int size() const
-	{
-		return this->_pos;
-	}
-private:
-	T* _items = 0;
-	unsigned int _pos = 0;
-	unsigned int _capacity = 0;
+		~vector()
+		{
+			if (this->_items != 0)
+			{
+				delete this->_items;
+			}
+		}
+		void push_back(const T& value)
+		{
+			this->ensure_capacity(this->size() + 1);
+			this->_items[this->_pos++] = value;
+		}
+		T at(unsigned int pos) const
+		{
+			return this->_items[pos];
+		}
+		unsigned int size() const
+		{
+			return this->_pos;
+		}
+	private:
+		T* _items = 0;
+		unsigned int _pos = 0;
+		unsigned int _capacity = 0;
 
-	void ensure_capacity(unsigned int count)
-	{
-		if (this->_capacity - this->_pos > count)
+		void ensure_capacity(unsigned int count)
 		{
-			return;
+			if (this->_capacity - this->_pos > count)
+			{
+				return;
+			}
+			if (this->_items == 0)
+			{
+				this->_items = new T[1];
+				this->_capacity = 1;
+			}
+			else
+			{
+				T* temp = new T[this->_capacity * 2];
+				memcpy(temp, this->_items, sizeof(T) * this->_pos);
+				delete[] this->_items;
+				this->_items = temp;
+				this->_capacity *= 2;
+			}
 		}
-		if (this->_items == 0)
-		{
-			this->_items = new T[1];
-			this->_capacity = 1;
-		}
-		else
-		{
-			T* temp = new T[this->_capacity * 2];
-			memcpy(temp, this->_items, sizeof(T) * this->_pos);
-			delete[] this->_items;
-			this->_items = temp;
-			this->_capacity *= 2;
-		}
-	}
-};
+	};
+}
 
 #endif

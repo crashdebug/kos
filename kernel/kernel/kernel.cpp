@@ -7,6 +7,7 @@
 #include <memory.h>
 #include <vector.h>
 #include <idriver.h>
+#include <command.h>
 
 /* Check if the compiler thinks we are targeting the wrong operating system. */ 
 #if defined(__linux__) 
@@ -18,11 +19,18 @@
 #error "This needs to be compiled with a ix86-elf compiler" 
 #endif
 
+using namespace kos;
+
 static vector<IDriver*> s_drivers;
 static time_t s_time = 0;
 
 static keycode_t s_keyBuffer[32];
 static uint8_t s_keyBufferPos = 0;
+
+void install_driver(IDriver* driver)
+{
+	s_drivers.push_back(driver);
+}
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,11 +60,6 @@ keycode_t read_key()
 	return s_keyBuffer[s_keyBufferPos--];
 }
 
-void install_driver(IDriver* driver)
-{
-	s_drivers.push_back(driver);
-}
-
 void kernel_early(multiboot_info_t* mbd, uint32_t magic)
 {
 	Terminal::write("BootInfo: 0x%8x, Magic: 0x%x\n", mbd, magic);
@@ -82,14 +85,19 @@ void kernel_main()
 	Terminal::write("]\n");
 	Terminal::setColor(Terminal::Color::COLOR_LIGHT_GREY, Terminal::Color::COLOR_BLACK);
 
-	unsigned long long l = 0;
 	while (true)
 	{
 		time_t t = time(0);
 		struct tm* time = gmtime(&t);
-		Terminal::write("\rDate: %2i.%2i.%4i %2i:%2i:%2i.%3i [%i]", time->tm_mday, time->tm_mon, time->tm_year, time->tm_hour, time->tm_min, time->tm_sec, (unsigned int)(t % 1000), l);
+		Terminal::write("\rDate: %2i.%2i.%4i %2i:%2i:%2i.%3i", time->tm_mday, time->tm_mon, time->tm_year, time->tm_hour, time->tm_min, time->tm_sec, (unsigned int)(t % 1000));
 		delete time;
-		l++;
+
+		const char* line = Terminal::readLine();
+		ICommand* cmd = CommandParser::Parse(line);
+		if (cmd != 0)
+		{
+			cmd->Execute();
+		}
 	}
 }
 
