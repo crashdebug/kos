@@ -7,6 +7,7 @@ extern "C" {
 #endif
 
 void install_rtc();
+void sleep(unsigned long long msecs);
 
 #ifdef __cplusplus
 }

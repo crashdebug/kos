@@ -178,6 +178,12 @@ void install_rtc()
 	outb(0x71, (prev & 0xF0) | rate);
 }
 
+void sleep(time_t msecs)
+{
+	time_t now = _time;
+	while (_time - now < msecs) ;
+}
+
 #ifdef __cplusplus
 }
 #endif
